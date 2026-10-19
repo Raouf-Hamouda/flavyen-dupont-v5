@@ -24,6 +24,7 @@
   const T = (fr, en) => EN ? en : fr;
   // Korean for a Korean browser (only where a data-ko text exists), English otherwise
   const KO = /^ko\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '');
+  for (const e of document.querySelectorAll('[data-en]')) e.dataset.fr = e.innerHTML;   // the French text, kept before any swap
   if (EN) {
     document.documentElement.lang = KO ? 'ko' : 'en';
     for (const e of document.querySelectorAll('[data-en]')) e.textContent = (KO && e.dataset.ko) || e.dataset.en;
@@ -32,7 +33,6 @@
   const LANGUES = ['fr', 'en', 'ko'];
   let langue = KO ? 'ko' : EN ? 'en' : 'fr';
   try { const m = localStorage.getItem('lang'); if (LANGUES.includes(m)) langue = m; } catch (e) {}
-  for (const e of document.querySelectorAll('[data-en]')) e.dataset.fr = e.innerHTML;
   function poserLangue(l) {
     langue = l;
     document.documentElement.lang = l;
