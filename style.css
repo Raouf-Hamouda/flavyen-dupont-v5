@@ -2823,3 +2823,6 @@ body[data-vue="contact"] #contact {
 /* the end of the Contact page: a normal, small breathing room under the credit line (no big empty block) */
 body[data-vue="contact"] #contact { padding-bottom: 56px !important; }
 @media (max-width: 899px) { body[data-vue="contact"] #contact { padding-bottom: 48px !important; } }
+
+/* the wheel / trackpad scrolls the Contact page from anywhere on it, left or right (the page itself catches it, not only the left column) */
+body[data-vue="contact"] #contact, body[data-vue="contact"] #contact .colonne, body[data-vue="contact"] #contact .droite { pointer-events: auto !important; }
