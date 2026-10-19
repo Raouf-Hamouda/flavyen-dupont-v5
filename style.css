@@ -1,0 +1,2762 @@
+:root {
+  --encre: #0c0c0c;
+  --papier: #fff;
+  --gris: #9b9b9b;
+  --w: 225px;
+  --h: calc(var(--w) / 1.5);
+  --milieu: calc(50% - 3vh);
+  --sans: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --ko: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  --serif: "Instrument Serif", "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --e: cubic-bezier(.2, .7, .2, 1);
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--papier);
+  color: var(--encre);
+  font: 500 15px/1.02 var(--sans);
+  letter-spacing: -.01em;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+a,
+button {
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: left;
+}
+.mono {
+  font: 400 10px/1.2 var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+/* ---------- top line: four small blocks, nothing else */
+.tete {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 0;
+  z-index: 6;
+}
+.tete > * {
+  position: absolute;
+  top: 22px;
+}
+.qui {
+  left: 20px;
+  display: flex;
+  gap: 10px;
+}
+.qui b {
+  font-weight: 700;
+}
+.qui span {
+  color: var(--gris);
+}
+/* the view switch: two small drawings of the layout, with their word */
+.vues {
+  left: 20px;
+  top: 118px;
+  display: flex;
+  gap: 18px;
+}
+.vues button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.vues i {
+  display: flex;
+  gap: 2px;
+}
+.vues .pb b {
+  width: 5px;
+  height: 9px;
+  background: currentColor;
+}
+.vues .pl {
+  flex-direction: column;
+}
+.vues .pl b {
+  width: 16px;
+  height: 1.5px;
+  background: currentColor;
+}
+.vues button,
+#cats button {
+  color: var(--gris);
+  transition: color .25s;
+}
+.vues button.actif,
+.vues button:hover,
+#cats button.actif,
+#cats button:hover {
+  color: var(--encre);
+}
+.filtres {
+  left: 36%;
+  display: flex;
+}
+/* the filters: a row of words, each carrying how many films it holds; the one in use is underlined */
+#compte {
+  display: none;
+}
+#cats {
+  display: flex;
+  gap: 20px;
+  font: 500 15px/1 var(--sans);
+  letter-spacing: -.01em;
+}
+#cats button {
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  padding-bottom: 5px;
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+  transition: color .25s, background-size .4s var(--e);
+}
+#cats button.actif {
+  background-size: 100% 1px;
+}
+#cats sup {
+  font-size: 8px;
+  line-height: 1;
+  letter-spacing: .04em;
+}
+/* a command: manuscript squares holding a Korean word, captioned in French */
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+}
+.btn .k {
+  display: flex;
+}
+.btn .k b {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--encre);
+  margin-left: -1px;
+  display: grid;
+  place-items: center;
+  font: 700 14px/1 var(--ko);
+  background: linear-gradient(var(--encre), var(--encre)) no-repeat left / 0 100%;
+  transition: background-size .3s var(--e), color .3s;
+}
+.btn .k b:first-child {
+  margin-left: 0;
+}
+.btn .k b:nth-child(2) {
+  transition-delay: .05s;
+}
+.btn .k b:nth-child(3) {
+  transition-delay: .1s;
+}
+.btn:hover .k b,
+.btn.actif .k b {
+  background-size: 100% 100%;
+  color: var(--papier);
+}
+.btn .mono {
+  color: var(--gris);
+  transition: color .3s;
+}
+.btn:hover .mono,
+.btn.actif .mono {
+  color: var(--encre);
+}
+.menu {
+  right: 20px;
+  top: 16px !important;
+  display: flex;
+  gap: 22px;
+}
+.heures {
+  position: fixed;
+  left: 20px;
+  top: 76px;
+  color: var(--gris);
+  z-index: 6;
+}
+
+/* ---------- the strip */
+.axe {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--milieu) - var(--h) / 2 - 22px);
+  height: calc(var(--h) + 22px + 52px);
+  width: 1px;
+  background: var(--encre);
+  z-index: 3;
+  pointer-events: none;
+}
+#bande {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: calc(var(--milieu) - var(--h) / 2);
+  height: var(--h);
+  z-index: 2;
+  cursor: grab;
+  touch-action: none;
+}
+#bande.prise {
+  cursor: grabbing;
+}
+.vignette {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  will-change: transform;
+}
+.vignette .cadre {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #ececec;
+  opacity: 0;
+  animation: entre 1.1s var(--e) forwards;
+  animation-delay: var(--d);
+  transition: transform .5s var(--e);
+}
+@keyframes entre {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.vignette img,
+.vignette video,
+#flottant img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity .35s, transform .7s var(--e);
+}
+.vignette video {
+  opacity: 0;
+}
+.vignette video.vivant {
+  opacity: 1;
+}
+.nb img,
+.nb video,
+#fv.nb {
+  filter: grayscale(1);
+}
+#piste.survol .vignette:not(.actif) img {
+  opacity: .35;
+}
+.vignette.actif img,
+.vignette.actif video {
+  transform: scale(1.06);
+}
+
+#regle {
+  position: fixed;
+  left: 0;
+  top: calc(var(--milieu) + var(--h) / 2 + 12px);
+  width: 100%;
+  height: 30px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* what the playhead is reading */
+#lu {
+  position: fixed;
+  left: 50%;
+  top: calc(var(--milieu) + var(--h) / 2 + 58px);
+  padding-left: 12px;
+  z-index: 3;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#lu .mono {
+  color: var(--gris);
+}
+#luTc {
+  margin-left: 14px;
+}
+#luMeta {
+  margin-top: 5px;
+}
+#lu.change {
+  animation: clin .5s var(--e);
+}
+@keyframes clin {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#bande,
+#regle,
+.axe,
+#lu {
+  transition: opacity .5s, transform .7s var(--e);
+}
+body:not([data-vue="bande"]) #bande,
+body:not([data-vue="bande"]) #regle,
+body:not([data-vue="bande"]) .axe,
+body:not([data-vue="bande"]) #lu,
+body:not([data-vue="bande"]) #fenetre,
+body:not([data-vue="bande"]) .outils,
+body:not([data-vue="bande"]) #sonAccueil,
+body:not([data-vue="bande"]) #poignee {
+  opacity: 0;
+  transform: translateY(26px);
+  pointer-events: none;
+}
+
+/* ---------- the foot of the page: the title of the film under the playhead, rolling like a counter */
+#titres {
+  position: fixed;
+  left: 20px;
+  right: 0;
+  bottom: .6vw;
+  height: 16.5vw;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+#rouleau {
+  will-change: transform;
+}
+.t {
+  height: 25vw;
+}
+.tp {
+  height: 16.5vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.tl {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3vw;
+  white-space: nowrap;
+  padding: 0 calc(20px + 1.6vw) 2.4vw 0;
+}
+.t .g {
+  font: 700 11.4vw/1 var(--sans);
+  letter-spacing: -.055em;
+}
+.t .i {
+  font: italic 400 13vw/1 var(--serif);
+  letter-spacing: -.02em;
+}
+
+/* ---------- list */
+#liste {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  top: 172px;
+  bottom: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-18px);
+  transition: opacity .5s, transform .7s var(--e);
+}
+body[data-vue="liste"] #liste {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+.rang {
+  display: grid;
+  grid-template-columns: 70px minmax(260px, 1.5fr) minmax(160px, 1fr) 90px 50px;
+  column-gap: 18px;
+  align-items: baseline;
+  padding: 7px 0 8px;
+  border-top: 1px solid rgba(12, 12, 12, .16);
+  cursor: pointer;
+  transition: opacity .3s;
+}
+.rang:last-child {
+  border-bottom: 1px solid rgba(12, 12, 12, .16);
+}
+#liste:hover .rang:not(:hover) {
+  opacity: .28;
+}
+.rang .titre {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  white-space: nowrap;
+  transition: transform .45s var(--e);
+}
+.rang:hover .titre {
+  transform: translateX(14px);
+}
+.rang .x,
+.t .x,
+#film .ligne .x {
+  font: 400 .5em/1 var(--mono);
+  color: var(--gris);
+  align-self: center;
+}
+.rang .x {
+  font-size: 12px;
+}
+.rang .role {
+  color: var(--gris);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.rang .g {
+  font: 700 24px/1 var(--sans);
+  letter-spacing: -.045em;
+}
+.rang .i {
+  font: italic 400 27px/1 var(--serif);
+  letter-spacing: 0;
+}
+.rang .an {
+  text-align: right;
+}
+#flottant {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: var(--w);
+  height: var(--h);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  z-index: 5;
+  transition: opacity .25s;
+  will-change: transform;
+}
+#flottant.on {
+  opacity: 1;
+}
+
+/* ---------- the film, full frame */
+#film {
+  --encre: #f3f3f1;
+  --papier: #060606;
+  --gris: rgba(243, 243, 241, .55);
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  visibility: hidden;
+  color: var(--encre);
+}
+.fiche {
+  --encre: #0c0c0c;
+  --papier: #fff;
+  --gris: #9b9b9b;
+}
+/* while a film is out of the strip, the others step back */
+#piste {
+  transition: opacity .45s;
+}
+body.sorti #piste {
+  opacity: 0;
+}
+body.film #film {
+  visibility: visible;
+}
+#film .noir {
+  position: absolute;
+  inset: 0;
+  background: #060606;
+  opacity: 0;
+  transition: opacity .7s;
+}
+#film.sombre .noir {
+  opacity: 1;
+}
+#vimeo,
+#voile {
+  position: absolute;
+  inset: 0;
+}
+#vimeo {
+  background: #000;
+  opacity: 0;
+  transition: opacity .7s;
+}
+#vimeo.on {
+  opacity: 1;
+}
+#vimeo {
+  overflow: hidden;
+}
+/* the film is taller than the screen by --ky when it fills the width (see echelle in app.js) */
+#vimeo iframe {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  height: calc(100% * var(--ky, 1));
+  transform: translateY(-50%);
+  border: 0;
+  display: block;
+}
+#voile {
+  cursor: pointer;
+}
+#fv {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+#film .ui {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  opacity: 0;
+  transition: opacity .5s;
+}
+#film.pret .ui {
+  opacity: 1;
+}
+#film.repos .ui {
+  opacity: 0;
+}
+#film.repos {
+  cursor: none;
+}
+#film .haut {
+  top: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.haut .droite {
+  display: flex;
+  gap: 22px;
+}
+.fiche .vimeo {
+  margin-top: 22px;
+  align-self: flex-start;
+  border-bottom: 1px solid rgba(12, 12, 12, .3);
+}
+#film .bas {
+  bottom: 22px;
+}
+#film .ligne {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.compteur {
+  font: 500 12px/1 var(--mono);
+  letter-spacing: .05em;
+}
+#film .ligne .g {
+  font: 700 17px/1 var(--sans);
+  letter-spacing: -.03em;
+}
+#film .ligne .i {
+  font: italic 400 20px/1 var(--serif);
+  letter-spacing: 0;
+}
+#fTc {
+  margin-left: auto;
+}
+.commande {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.barre {
+  flex: 1;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;
+}
+.rail {
+  position: relative;
+  width: 100%;
+  height: 9px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .2);
+  transition: height .3s var(--e), background .3s;
+}
+.barre:hover .rail,
+.barre.prise .rail {
+  height: 22px;
+  background: rgba(255, 255, 255, .34);
+}
+.plein {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  min-width: 9px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #fff 0, #fff calc(100% - 54px), rgba(255, 255, 255, 0) 100%);
+}
+.plein i {
+  position: absolute;
+  right: 3px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: #f0f0f0;
+}
+.rond {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #ececec;
+  color: #000;
+  text-align: center;
+  font: 400 17px/28px var(--sans);
+  transition: background .3s, color .3s;
+}
+.rond:hover {
+  background: #000;
+  color: #ececec;
+}
+
+.fiche {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(440px, 100%);
+  background: var(--papier);
+  color: var(--encre);
+  padding: 20px 20px 28px;
+  transform: translateX(101%);
+  transition: transform .7s cubic-bezier(.7, 0, .15, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+#film.info .fiche {
+  transform: none;
+}
+.fiche .ferme {
+  align-self: flex-end;
+}
+.fiche .no {
+  margin-top: 46px;
+  color: var(--gris);
+}
+.fiche h2 {
+  font: 700 46px/1 var(--sans);
+  letter-spacing: -.05em;
+  margin: 12px 0 2px -2px;
+}
+.fiche h3 {
+  font: italic 400 40px/1 var(--serif);
+  letter-spacing: 0;
+}
+.fiche dl {
+  margin: 30px 0 0;
+  border-top: 1px solid rgba(12, 12, 12, .16);
+}
+.fiche dl div {
+  padding: 9px 0 10px;
+  border-bottom: 1px solid rgba(12, 12, 12, .16);
+}
+.fiche dt {
+  color: var(--gris);
+  margin-bottom: 5px;
+}
+.fiche dd {
+  font-size: 16px;
+  line-height: 1.15;
+}
+.fiche h3 + p {
+  margin-top: 26px;
+}
+.fiche p + p {
+  margin-top: 10px;
+}
+.fiche p {
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 400;
+  max-width: 36ch;
+}
+
+/* the giant film title belongs to the strip only: it leaves for the list, about and contact */
+#titres {
+  transition: opacity .5s;
+}
+body:not([data-vue="bande"]) #titres {
+  opacity: 0;
+}
+.t .x {
+  font-size: 3.4vw;
+}
+
+/* ---------- about and contact */
+.page {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .5s;
+}
+body[data-vue="apropos"] #apropos,
+body[data-vue="contact"] #contact {
+  opacity: 1;
+}
+.page .colonne {
+  position: absolute;
+  left: 20px;
+  top: 196px;
+  width: min(640px, calc(100% - 40px));
+  transform: translateY(22px);
+  transition: transform .8s var(--e);
+}
+body[data-vue="apropos"] #apropos .colonne,
+body[data-vue="contact"] #contact .colonne {
+  transform: none;
+}
+.chapeau {
+  font: 400 29px/1.1 var(--sans);
+  letter-spacing: -.028em;
+}
+.listes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 40px;
+}
+.listes dt {
+  color: var(--gris);
+  padding-bottom: 9px;
+  margin-bottom: 9px;
+  border-bottom: 1px solid rgba(12, 12, 12, .16);
+}
+.listes dd {
+  font-size: 17px;
+  line-height: 1.22;
+  font-weight: 400;
+}
+.geste {
+  margin-top: 30px;
+  color: var(--gris);
+}
+/* contact: each address is a line that fills with ink under the hand */
+.adresses {
+  margin-top: 40px;
+  border-bottom: 1px solid rgba(12, 12, 12, .16);
+}
+body[data-vue="contact"] .adresses {
+  pointer-events: auto;
+}
+.lien {
+  display: grid;
+  grid-template-columns: 130px 1fr auto;
+  align-items: baseline;
+  padding: 14px 12px 15px 0;
+  border-top: 1px solid rgba(12, 12, 12, .16);
+  cursor: pointer;
+  background: linear-gradient(var(--encre), var(--encre)) no-repeat left / 0 100%;
+  transition: background-size .5s var(--e), color .3s, padding .5s var(--e);
+}
+.lien:hover {
+  background-size: 100% 100%;
+  color: var(--papier);
+  padding-left: 12px;
+}
+.lien .mono {
+  color: var(--gris);
+}
+.lien .v {
+  font-size: 24px;
+  letter-spacing: -.03em;
+}
+/* the giant line at the foot of both pages */
+.grand {
+  position: absolute;
+  left: 20px;
+  right: 0;
+  bottom: .6vw;
+}
+.grand .tl {
+  align-items: flex-end;
+}
+.grand .g {
+  font: 700 11.4vw/15vw var(--sans);
+  letter-spacing: -.055em;
+}
+.grand .i {
+  font: italic 400 13vw/15vw var(--serif);
+  letter-spacing: -.02em;
+}
+/* the greeting turns: one language after the other */
+.salut {
+  height: 15vw;
+  overflow: hidden;
+  text-align: right;
+}
+.tour {
+  display: flex;
+  flex-direction: column;
+  transition: transform .9s var(--e);
+}
+.tour i {
+  height: 15vw;
+  font: italic 400 13vw/15vw var(--serif);
+  letter-spacing: -.02em;
+  white-space: nowrap;
+}
+.tour i.ko {
+  font: 900 8.6vw/15vw var(--ko);
+  letter-spacing: -.06em;
+}
+#trainee {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pose {
+  position: absolute;
+  width: clamp(90px, 9vw, 150px);
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  transform: translate(-50%, -50%);
+  animation: pose .9s var(--e) forwards;
+}
+.pose.nb {
+  filter: grayscale(1);
+}
+@keyframes pose {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.92);
+  }
+  18% {
+    opacity: .9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  45% {
+    opacity: .9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(.97);
+  }
+}
+
+/* ---------- narrow desktop and tablet: the filters move toward the middle */
+@media (max-width: 1000px) {
+  .filtres {
+    left: 300px;
+  }
+  /* no room beside the squares: the word goes under them */
+  .menu .btn {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .menu .mono {
+    font-size: 8px;
+  }
+  .menu {
+    gap: 10px;
+  }
+}
+
+/* ---------- phone: the strip runs down the page and each film is nearly full width */
+@media (max-width: 699px) {
+  html,
+  body {
+    font-size: 13px;
+  }
+  .tete > * {
+    top: 16px;
+  }
+  .qui {
+    left: 16px;
+  }
+  .qui b {
+    font-size: 13px;
+  }
+  .qui span {
+    display: none;
+  }
+  .menu {
+    right: 16px;
+    top: 12px !important;
+    gap: 8px;
+  }
+  .filtres {
+    left: 16px;
+    top: 64px;
+  }
+  #cats {
+    gap: 14px;
+    font-size: 13px;
+  }
+  .heures {
+    display: none;
+  }
+  .vues {
+    left: auto;
+    right: 16px;
+    top: 64px;
+    gap: 14px;
+  }
+  #bande {
+    top: 92px;
+    height: calc(100% - 92px - 124px);
+    overflow: hidden;
+  }
+  .axe {
+    left: 0;
+    top: calc(92px + (100% - 216px) / 2);
+    width: 100%;
+    height: 1px;
+  }
+  #regle {
+    top: 92px;
+    width: 12px;
+    height: calc(100% - 216px);
+  }
+  #lu {
+    left: 16px;
+    right: 16px;
+    top: auto;
+    bottom: 100px;
+    padding: 0;
+    display: flex;
+    justify-content: space-between;
+  }
+  #luMeta {
+    margin-top: 0;
+  }
+  #titres {
+    left: 16px;
+    right: 0;
+    bottom: 4px;
+    height: 23vw;
+  }
+  .t {
+    height: 36vw;
+  }
+  .tp {
+    height: 23vw;
+  }
+  .tl {
+    gap: 4vw;
+    padding: 0 22px 3.4vw 0;
+  }
+  .t .g {
+    font-size: 15vw;
+  }
+  .t .i {
+    font-size: 16.5vw;
+  }
+  #liste {
+    left: 16px;
+    right: 16px;
+    top: 96px;
+    bottom: 16px;
+  }
+  .rang {
+    grid-template-columns: 26px 1fr 40px;
+    column-gap: 10px;
+    padding: 7px 0;
+  }
+  .rang .cat,
+  .rang .role {
+    display: none;
+  }
+  .rang .titre {
+    overflow: hidden;
+  }
+  .rang .g {
+    font-size: 18px;
+  }
+  .rang .i {
+    font-size: 20px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .page .colonne {
+    left: 16px;
+    top: 104px;
+    width: calc(100% - 32px);
+  }
+  .listes {
+    margin-top: 24px;
+  }
+  .listes dd {
+    font-size: 15px;
+  }
+  .adresses {
+    margin-top: 24px;
+  }
+  .lien {
+    grid-template-columns: 84px 1fr auto;
+  }
+  .lien .v {
+    font-size: 17px;
+  }
+  .grand .g {
+    font-size: 15vw;
+    line-height: 22vw;
+  }
+  .grand .i,
+  .tour i {
+    font-size: 16.5vw;
+    line-height: 22vw;
+  }
+  .tour i,
+  .salut {
+    height: 22vw;
+  }
+  .tour i.ko {
+    font-size: 11vw;
+    line-height: 22vw;
+  }
+  .chapeau {
+    font-size: 20px;
+  }
+  .grand {
+    left: 16px;
+    bottom: 6px;
+  }
+  #film .ui {
+    left: 16px;
+    right: 16px;
+  }
+  .fiche h2 {
+    font-size: 44px;
+  }
+  .fiche h3 {
+    font-size: 32px;
+  }
+}
+
+/* ---------- the cursor: one red square, which frames a command when it is over one */
+#curseur {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #d6301d;
+  pointer-events: none;
+  z-index: 40;
+  opacity: 0;
+  will-change: transform, width, height;
+}
+@media (hover: none) {
+  #curseur {
+    display: none;
+  }
+}
+
+/* ---------- header: each line is its own layer, with room between them */
+@media (min-width: 700px) {
+  .qui {
+    display: block;
+  }
+  .qui b,
+  .qui span {
+    display: block;
+  }
+  .qui span {
+    margin-top: 12px;
+    line-height: 1.2;
+  }
+  .qui .salue {
+    margin-top: 3px;
+  }
+  .tete > * {
+    top: 26px;
+  }
+  .menu {
+    top: 20px !important;
+  }
+  .heures {
+    top: 112px;
+  }
+  .vues {
+    top: 154px;
+  }
+  #liste {
+    top: 210px;
+  }
+}
+
+/* ---------- credits panel: the same square system as the rest of the site */
+.fiche {
+  width: min(560px, 100%);
+  padding: 0 28px 36px;
+}
+.fbarre {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--papier);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 0 17px;
+  border-bottom: 1px solid var(--encre);
+}
+.fbarre > .mono {
+  color: var(--gris);
+}
+.fbarre .btn {
+  flex-direction: row-reverse;
+}
+.ftete {
+  padding: 38px 0 30px;
+}
+.fiche .no {
+  margin-top: 0;
+}
+.ftexte {
+  padding-bottom: 34px;
+}
+.fiche .ftexte p {
+  font-size: 17px;
+  line-height: 1.25;
+  max-width: 40ch;
+}
+.fiche dl {
+  margin: 0;
+  border-top: 1px solid var(--encre);
+}
+.fiche dl div {
+  display: grid;
+  grid-template-columns: 40% 1fr;
+  column-gap: 18px;
+  padding: 12px 0 13px;
+}
+.fiche dt {
+  margin: 3px 0 0;
+  line-height: 1.4;
+}
+.fiche dd span {
+  display: block;
+}
+.fiche dd span + span {
+  margin-top: 3px;
+}
+.fiche .vimeo {
+  margin-top: 32px;
+  border: 0;
+}
+
+/* ---------- about and contact: the giant line also listens to the height of the window, and the text never runs under it */
+.page {
+  --pg: min(1vw, 1.75vh);
+}
+@media (min-width: 700px) {
+  .grand .g {
+    font-size: calc(var(--pg) * 11.4);
+    line-height: calc(var(--pg) * 15);
+  }
+  .grand .i,
+  .tour i {
+    font-size: calc(var(--pg) * 13);
+    line-height: calc(var(--pg) * 15);
+  }
+  .tour i,
+  .salut {
+    height: calc(var(--pg) * 15);
+  }
+  .tour i.ko {
+    font-size: calc(var(--pg) * 8.6);
+    line-height: calc(var(--pg) * 15);
+  }
+  .page .colonne {
+    top: 222px;
+    max-height: calc(100% - 222px - var(--pg) * 17.5);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+}
+@media (max-width: 699px) {
+  .page {
+    --pg: min(1vw, 1.15vh);
+  }
+  .grand .g {
+    font-size: calc(var(--pg) * 15);
+    line-height: calc(var(--pg) * 22);
+  }
+  .grand .i,
+  .tour i {
+    font-size: calc(var(--pg) * 16.5);
+    line-height: calc(var(--pg) * 22);
+  }
+  .tour i,
+  .salut {
+    height: calc(var(--pg) * 22);
+  }
+  .tour i.ko {
+    font-size: calc(var(--pg) * 11);
+    line-height: calc(var(--pg) * 22);
+  }
+  .page .colonne {
+    max-height: calc(100% - 104px - var(--pg) * 26);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+}
+body[data-vue="apropos"] #apropos .colonne,
+body[data-vue="contact"] #contact .colonne {
+  pointer-events: auto;
+}
+.page .colonne::-webkit-scrollbar,
+#liste::-webkit-scrollbar,
+.fiche::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- the giant film title also listens to the height of the window, so it never climbs onto the strip */
+@media (min-width: 700px) {
+  :root {
+    --pt: min(1vw, 1.6vh);
+  }
+  #titres {
+    height: calc(var(--pt) * 16.5);
+  }
+  .t {
+    height: calc(var(--pt) * 25);
+  }
+  .tp {
+    height: calc(var(--pt) * 16.5);
+  }
+  #titres .tl {
+    padding-bottom: calc(var(--pt) * 2.4);
+  }
+  .t .g {
+    font-size: calc(var(--pt) * 11.4);
+  }
+  .t .i {
+    font-size: calc(var(--pt) * 13);
+  }
+  .t .x {
+    font-size: calc(var(--pt) * 3.4);
+  }
+}
+
+/* ---------- credits: a générique. A line is drawn down the middle of the film; roles hang on its left,
+   names on its right, and the whole thing rolls up like end credits. */
+#film .ui {
+  z-index: 3;
+}
+#film.info .bas {
+  opacity: 0;
+  pointer-events: none;
+}
+#generique {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow: hidden;
+  background: rgba(6, 6, 6, .84);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .6s;
+  touch-action: none;
+  cursor: grab;
+}
+#film.info #generique {
+  opacity: 1;
+  pointer-events: auto;
+}
+#generique::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(243, 243, 241, .26);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 1.1s var(--e);
+}
+#film.info #generique::before {
+  transform: scaleY(1);
+}
+.roule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  will-change: transform;
+}
+.gl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 44px;
+  align-items: baseline;
+  padding: 0 20px;
+  margin-bottom: 28px;
+}
+.ga {
+  text-align: right;
+  color: var(--gris);
+}
+.gd {
+  font-size: 24px;
+  line-height: 1.14;
+  letter-spacing: -.028em;
+}
+.gd span {
+  display: block;
+}
+.gtitre,
+.gnote {
+  margin-bottom: 70px;
+}
+.gtitre h2 {
+  font: 700 clamp(42px, 6vw, 96px) / .95 var(--sans);
+  letter-spacing: -.055em;
+  margin-left: -.04em;
+}
+.gtitre h3 {
+  font: italic 400 clamp(42px, 6.4vw, 102px) / 1 var(--serif);
+  letter-spacing: -.02em;
+}
+.gtexte p {
+  font-size: 19px;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -.015em;
+  max-width: 36ch;
+}
+.gtexte p + p {
+  margin-top: 10px;
+}
+.gfin {
+  margin-top: 60px;
+  align-items: center;
+}
+@media (max-width: 699px) {
+  .gl {
+    grid-template-columns: 30% 1fr;
+    column-gap: 20px;
+    padding: 0 16px;
+    margin-bottom: 22px;
+  }
+  #generique::before {
+    left: calc(16px + (100% - 52px) * .3 + 10px);
+  }
+  .gd {
+    font-size: 17px;
+  }
+  .gtexte p {
+    font-size: 16px;
+  }
+  .gtitre,
+  .gnote {
+    margin-bottom: 44px;
+  }
+}
+@media (max-width: 699px) {
+  /* on a phone the label sits under its squares, so the word stays readable */
+  #film .haut .btn,
+  .tcmd .btn {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  #film .haut .btn .mono,
+  .tcmd .btn .mono {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+}
+
+/* ---------- quality: the sharp still of the film sits over the soft loop until the film plays */
+#fa {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  opacity: 0;
+  transition: opacity .6s;
+  pointer-events: none;
+}
+#fa.on {
+  opacity: 1;
+}
+#qualite {
+  display: none;
+}
+#qualite.dispo {
+  display: flex;
+}
+@media (max-width: 699px) {
+  #film .haut #qualite .mono {
+    display: block;
+  }
+}
+
+/* ---------- light mode: slow device or reduced motion. Fewer things move, nothing is lost. */
+body.leger .vignette img,
+body.leger .vignette video {
+  transition: opacity .2s;
+}
+body.leger .cadre {
+  animation-duration: .01s;
+}
+body.leger .pose {
+  animation-duration: 1s;
+}
+
+/* ---------- the player bar: manuscript tiles in grey-blue. Title in the top row, the film in the bottom row. */
+#film {
+  --bleu: #a9b8c7;
+  --tuile: rgba(190, 202, 214, .36);
+  --nt: 40;
+  --ct: 34px;
+}
+#film .ligne {
+  justify-content: space-between;
+  margin-bottom: 10px;
+  color: var(--bleu);
+}
+#fTc {
+  margin-left: 0;
+}
+.rangee,
+.regleT {
+  display: grid;
+  grid-template-columns: repeat(var(--nt), 1fr);
+}
+.tu {
+  aspect-ratio: 1;
+  border: 1px solid var(--tuile);
+  border-left-width: 0;
+  position: relative;
+  overflow: hidden;
+}
+.tu:first-child {
+  border-left-width: 1px;
+}
+#tTitre .tu {
+  display: grid;
+  place-items: center;
+  font: 700 calc(var(--ct) * .44) / 1 var(--sans);
+  letter-spacing: -.03em;
+}
+#tTitre .tu.i {
+  font: italic 400 calc(var(--ct) * .58) / 1 var(--serif);
+  letter-spacing: 0;
+}
+#tTitre .tu.x {
+  font: 400 calc(var(--ct) * .42) / 1 var(--mono);
+  color: var(--bleu);
+}
+/* the narrow strip between two manuscript rows carries the timecodes */
+.regleT {
+  height: 19px;
+  color: var(--bleu);
+}
+.tk {
+  position: relative;
+}
+.tk::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 4px;
+  background: var(--bleu);
+  opacity: .5;
+}
+.tk.maj::before {
+  height: 8px;
+  opacity: 1;
+}
+.tk span {
+  position: absolute;
+  left: 4px;
+  bottom: 6px;
+  font-size: 8.5px;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+#tTemps {
+  cursor: pointer;
+  touch-action: none;
+}
+.enc {
+  position: absolute;
+  inset: 0;
+  background: var(--bleu);
+  transform-origin: left;
+  transform: scaleX(0);
+  will-change: transform;
+}
+#tTemps .tu.cur {
+  box-shadow: inset 0 0 0 1px #d6301d;
+}
+#tTemps .tu.hov::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid #d6301d;
+}
+/* with a mouse, the cursor itself sticks to the tile and takes its size */
+@media (hover: hover) {
+  #tTemps .tu.hov::after {
+    display: none;
+  }
+}
+
+.tcmd {
+  display: flex;
+  gap: 22px;
+  margin-top: 16px;
+}
+.tcmd #pause {
+  margin-left: auto;
+}
+@media (max-width: 699px) {
+  .tcmd {
+    gap: 12px;
+  }
+}
+
+/* ---------- the small mark before the name */
+.marque {
+  width: 30px;
+  height: 16px;
+  margin-bottom: 12px;
+  display: block;
+  fill: none;
+  stroke: #7f8fa0;
+  stroke-width: 5;
+  overflow: visible;
+}
+@media (max-width: 699px) {
+  .marque {
+    display: none;
+  }
+}
+
+/* ---------- the giant title: two stacked layers that hand over to each other; no edge cuts the words */
+#titres {
+  overflow: visible;
+}
+.t {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 100% !important;
+  will-change: transform, opacity;
+}
+.t.cache {
+  opacity: 0;
+}
+.t .tp {
+  height: 100%;
+}
+.tl > span {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* ---------- the logo, on the About and Contact pages */
+.logo-fd {
+  margin-bottom: 34px;
+}
+.logo {
+  display: inline-flex;
+  align-items: baseline;
+  font: 800 clamp(34px, 5vw, 74px) / 1 var(--sans);
+  letter-spacing: -.062em;
+  white-space: nowrap;
+  color: var(--encre);
+}
+.logo .w1,
+.logo .fl {
+  color: #8fa3c2;
+}
+.logo .c {
+  display: inline-block;
+  overflow: hidden;
+  padding: .06em .04em .26em;
+  margin: -.06em -.04em -.26em;
+}
+.logo .c span {
+  display: inline-block;
+}
+.logo .c.apres-e {
+  margin-left: -.012em;
+}
+.logo .esp {
+  width: .25em;
+  flex: none;
+}
+.logo .fl {
+  display: inline-block;
+  overflow: hidden;
+  padding: .06em 0 0;
+  margin: -.06em 0 0;
+  flex: none;
+}
+.logo .fl svg {
+  display: block;
+  fill: currentColor;
+  overflow: visible;
+}
+/* the full stop: a director's clapperboard */
+.logo .pt {
+  position: relative;
+  width: .27em;
+  height: .17em;
+  margin-left: .13em;
+  background: var(--encre);
+  flex: none;
+}
+.logo .pt::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + .022em);
+  width: 100%;
+  height: .058em;
+  background: repeating-linear-gradient(115deg, var(--encre) 0 .045em, transparent .045em .08em);
+  transform-origin: left bottom;
+  transform: rotate(-13deg);
+}
+.logo.joue .c span,
+.logo.joue .fl svg {
+  transform: translateY(125%);
+  animation: logoMonte .85s var(--e) .15s forwards;
+  animation-delay: calc(.15s + var(--n, 0) * 40ms);
+}
+.logo.joue .pt {
+  opacity: 0;
+  animation: logoTombe .7s cubic-bezier(.3, 1.6, .5, 1) .95s forwards;
+}
+.logo.joue .pt::before {
+  animation: logoClap .9s cubic-bezier(.5, 0, .2, 1) 1.65s both;
+}
+@keyframes logoMonte {
+  to {
+    transform: none;
+  }
+}
+@keyframes logoTombe {
+  from {
+    opacity: 1;
+    transform: translateY(-1.5em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes logoClap {
+  0% {
+    transform: rotate(-30deg);
+  }
+  30%,
+  48% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(-13deg);
+  }
+}
+@media (max-width: 699px) {
+  .logo-fd {
+    margin-bottom: 22px;
+  }
+}
+
+/* ---------- the giant title rolls again, through a window with soft edges and room for the tails of the letters */
+#titres {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 95%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 13%, #000 95%, transparent 100%);
+}
+.t {
+  will-change: transform;
+}
+@media (min-width: 700px) {
+  #titres {
+    height: calc(var(--pt) * 18);
+  }
+  #titres .tl {
+    padding-bottom: calc(var(--pt) * 4.4);
+  }
+}
+@media (max-width: 699px) {
+  #titres {
+    height: 26vw;
+    bottom: 4px;
+  }
+  #titres .tl {
+    padding-bottom: 5vw;
+  }
+}
+
+/* ---------- the list preview has its own size: small enough never to hide the list */
+#flottant {
+  width: clamp(150px, 16vw, 290px);
+  height: auto;
+  aspect-ratio: 3 / 2;
+}
+@media (max-width: 699px) {
+  #flottant {
+    width: 38vw;
+  }
+  /* the role stays under the name on a phone too */
+  .qui span:not(.salue) {
+    display: block;
+    margin-top: 3px;
+    font-size: 11px;
+  }
+}
+@media (max-width: 699px) {
+  .qui {
+    display: block;
+  }
+}
+
+/* ---------- contact on a phone: the address is too long for one line, so it stacks, each half fitted to the width */
+@media (max-width: 699px) {
+  #contact .grand .tl {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-right: 16px;
+  }
+  #contact .grand .g,
+  #contact .grand .i {
+    line-height: 1.02;
+  }
+  #contact .colonne {
+    max-height: calc(100% - 104px - var(--pg) * 44);
+  }
+}
+
+/* ---------- the giant lines of About and Contact: stacked on a phone, and the text above always stops short of them */
+@media (min-width: 700px) {
+  .page .colonne {
+    max-height: calc(100% - 222px - var(--pg) * 19.5 - 1vw);
+  }
+}
+@media (max-width: 699px) {
+  .grand .tl {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding-right: 16px;
+  }
+  .grand .g,
+  .grand .i,
+  .tour i {
+    line-height: calc(var(--pg) * 19);
+  }
+  .tour i,
+  .salut {
+    height: calc(var(--pg) * 19);
+  }
+  .tour i.ko {
+    line-height: calc(var(--pg) * 19);
+  }
+  .salut {
+    text-align: left;
+  }
+  .page .colonne,
+  #contact .colonne {
+    max-height: calc(100% - 104px - var(--pg) * 42);
+  }
+  #contact .grand .g,
+  #contact .grand .i {
+    line-height: 1.04;
+  }
+}
+
+/* ---------- strip <-> list: the lines that travel between the ruler and the list rules */
+#passage {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+/* during the passage the two views do not cross-fade by themselves: the script leads */
+body.net #bande,
+body.net #regle,
+body.net .axe,
+body.net #lu,
+body.net #liste,
+body.net #titres {
+  transition: none !important;
+}
+body.net #liste {
+  transform: none !important;
+}
+/* the travelling lines stand in for the list rules during the passage */
+body.net .rang {
+  border-color: transparent !important;
+}
+
+/* ---------- between two films: a swipe between the two sharp stills */
+.glisse {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.glisse.on {
+  opacity: 1;
+}
+
+
+/* ---------- on a wide screen the strip is an edit timeline: tracks of clips under a still playhead,
+   and above the playhead a window that takes the shape of the film it crosses */
+#fenetre {
+  display: none;
+}
+body.temps {
+  --hp: 66px;
+  --np: 3;
+  /* the edit is anchored to the foot of the screen; the window takes all the room left above it,
+     so smaller tracks mean a bigger picture */
+  --haut: 118px;
+  --pied: calc(100vh - 132px - var(--np) * var(--hp));
+  --fh: calc(var(--pied) - 44px - var(--haut));
+}
+/* the big title at the foot belongs to the phone strip only */
+body.temps #titres,
+body.temps #luTc {
+  display: none;
+}
+body.temps #bande {
+  top: var(--pied);
+  height: calc(var(--np) * var(--hp));
+}
+body.temps .axe {
+  top: calc(var(--pied) - 16px);
+  height: calc(var(--np) * var(--hp) + 58px);
+}
+body.temps #regle {
+  top: calc(var(--pied) + var(--np) * var(--hp) + 4px);
+}
+body.temps #lu {
+  top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
+}
+.tetel {
+  display: none;
+}
+body.temps .tetel {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  padding: 4px 7px 3px;
+  background: var(--encre);
+  color: var(--papier);
+  white-space: nowrap;
+}
+body.temps #fenetre {
+  /* as tall as the room allows, unless the film is so wide that it would reach the sides */
+  --ratio: 1.7778;
+  --wh: min(var(--fh), calc((100vw - 520px) / var(--ratio)));
+  display: block;
+  position: fixed;
+  left: 50%;
+  top: calc(var(--pied) - 44px - var(--wh));
+  height: var(--wh);
+  width: calc(var(--wh) * var(--ratio, 1.78));
+  transform: translateX(-50%);
+  background: #ececec;
+  overflow: hidden;
+  z-index: 2;
+  cursor: pointer;
+  transition: width .7s var(--e), height .7s var(--e), top .7s var(--e), opacity .5s;
+}
+body.tire #fenetre {
+  transition: none;
+}
+#fenetre img,
+#fenetre video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#fenetre video {
+  opacity: 0;
+  transition: opacity .35s;
+}
+#fenetre video.vivant {
+  opacity: 1;
+}
+#fenetre.nb img,
+#fenetre.nb video {
+  filter: grayscale(1);
+}
+.clip {
+  position: absolute;
+  left: 0;
+  height: calc(var(--hp) - 8px);
+  will-change: transform;
+}
+/* a clip is its own frames, side by side; its name sits just above it, outside the frames */
+.clip .cadre {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 22px;
+  overflow: hidden;
+  background: #ececec repeat-x left center / auto 100%;
+  outline: 1px solid rgba(12, 12, 12, .16);
+  outline-offset: -1px;
+  opacity: .38;
+  filter: grayscale(1);
+  transition: opacity .4s, filter .4s, outline-color .3s;
+}
+.clip:hover .cadre {
+  opacity: .8;
+}
+.clip.actif .cadre {
+  opacity: 1;
+  filter: none;
+  outline: 2px solid var(--encre);
+  outline-offset: -2px;
+}
+.clip.nb .cadre {
+  filter: grayscale(1);
+}
+.etiq {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: 100%;
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  overflow: hidden;
+  white-space: nowrap;
+  color: var(--gris);
+  transition: color .35s;
+}
+.clip:hover .etiq,
+.clip.actif .etiq {
+  color: var(--encre);
+}
+.etiq b {
+  font: 700 13px/1 var(--sans);
+  letter-spacing: -.03em;
+}
+.etiq i {
+  font: italic 400 16px/1 var(--serif);
+}
+.etiq .mono {
+  color: var(--gris);
+}
+/* the track headers: one quiet line each, level with the frames; a click keeps only that track */
+.nompiste {
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  height: calc(var(--hp) - 30px);
+  margin-top: 22px;
+  padding: 0 14px 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--papier);
+  color: var(--encre);
+  cursor: pointer;
+}
+.nompiste {
+  transition: color .25s;
+}
+.nompiste.eteint {
+  color: var(--gris);
+}
+.nompiste:hover {
+  color: var(--encre);
+}
+/* the picked track is underlined, like the picked filter of the list */
+.nompiste.solo {
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
+}
+/* on a wide screen the filters exist in the list and nowhere else: not on the timeline (it has its tracks), not
+   on About or Contact, not while the page loads. They are gone at once, never seen fading over another view. */
+.filtres {
+  transition: opacity .4s;
+}
+@media (min-width: 700px) {
+  body:not([data-vue="liste"]) .filtres {
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+  }
+}
+
+/* ---------- phone: more air under the header, now that the words sit under the squares */
+@media (max-width: 699px) {
+  .filtres,
+  .vues {
+    top: 72px;
+  }
+  #bande {
+    top: 104px;
+    height: calc(100% - 104px - 124px);
+  }
+  .axe {
+    top: calc(104px + (100% - 228px) / 2);
+  }
+  #regle {
+    top: 104px;
+    height: calc(100% - 228px);
+  }
+  #liste {
+    top: 110px;
+  }
+  /* About and Contact read as one column that scrolls: the big lines come right after the text, no empty gap */
+  body[data-vue="apropos"] #apropos,
+  body[data-vue="contact"] #contact {
+    pointer-events: auto;
+  }
+  .page {
+    overflow-y: auto;
+    scrollbar-width: none;
+    padding: 128px 0 16px;
+  }
+  .page::-webkit-scrollbar {
+    display: none;
+  }
+  .page .colonne,
+  #contact .colonne {
+    position: relative;
+    left: 16px;
+    top: 0;
+    max-height: none;
+    overflow: visible;
+  }
+  .grand {
+    position: relative;
+    left: 16px;
+    bottom: auto;
+    margin-top: 44px;
+  }
+}
+
+/* ---------- the controls of the edit: zoom, track height, and the handle under the tracks */
+.outils,
+#poignee {
+  display: none;
+}
+body.temps .outils {
+  display: flex;
+  position: fixed;
+  left: 20px;
+  top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
+  flex-direction: column;
+  gap: 9px;
+  color: var(--gris);
+  z-index: 3;
+  transition: opacity .5s;
+}
+.outils .ctl {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.outils .ctl > span {
+  width: 58px;
+}
+.outils button {
+  width: 16px;
+  text-align: center;
+  font: 400 14px/1 var(--mono);
+  color: var(--encre);
+}
+.outils .aide {
+  font-size: 8.5px;
+  letter-spacing: .05em;
+}
+.outils input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 14px;
+  background: linear-gradient(var(--encre), var(--encre)) no-repeat center / 100% 1px;
+  cursor: pointer;
+}
+.outils input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 9px;
+  height: 14px;
+  background: var(--encre);
+  border: 0;
+}
+.outils input[type="range"]::-moz-range-thumb {
+  width: 9px;
+  height: 14px;
+  background: var(--encre);
+  border: 0;
+  border-radius: 0;
+}
+/* the handle under the track names: nothing to see until the cursor is on it */
+body.temps #poignee {
+  display: block;
+  position: fixed;
+  left: 0;
+  width: 120px;
+  top: calc(var(--pied) + var(--np) * var(--hp) - 12px);
+  height: 12px;
+  z-index: 4;
+  cursor: ns-resize;
+  background: linear-gradient(var(--encre), var(--encre)) no-repeat 20px center / 60px 1px;
+  opacity: 0;
+  transition: opacity .3s;
+}
+body.temps #poignee:hover,
+body.tire #poignee {
+  opacity: 1;
+}
+body.tire {
+  cursor: ns-resize;
+}
+
+/* ---------- strip <-> list: the travelling name and the travelling line of each film */
+.rang.vol {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  padding: 0;
+  border: 0 !important;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.trait-v {
+  position: absolute;
+  overflow: hidden;
+  background: rgba(12, 12, 12, .16);
+}
+.trait-v b {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeat-x left center / auto 100%;
+}
+.trait-v.gris b {
+  filter: grayscale(1);
+}
+#fenetre {
+  transform-origin: 50% 100%;
+}
+body.net #fenetre,
+body.net .outils,
+body.net #poignee {
+  transition: none !important;
+}
+
+/* ---------- phone, About and Contact: the page always fills the screen. The text starts at the top, the big line
+   ends at the foot, and the room between them is shared out between the lines instead of being left empty */
+@media (max-width: 699px) {
+  .page {
+    display: flex;
+    flex-direction: column;
+  }
+  .page .colonne,
+  #contact .colonne {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  #apropos .colonne {
+    justify-content: space-between;
+  }
+  .adresses {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .lien {
+    flex: 1;
+    align-items: center;
+  }
+  .grand {
+    flex: none;
+  }
+}
+
+/* Firefox draws its own track under a slider: ours is the line */
+.outils input[type="range"]::-moz-range-track {
+  background: transparent;
+}
+/* a touch screen has no hover: the handle under the tracks is always there to grab */
+@media (hover: none) {
+  body.temps #poignee {
+    opacity: .5;
+    height: 20px;
+  }
+}
+
+/* on a phone the travelling line starts as the whole picture of the film */
+.trait-v.photo b {
+  background: center / cover no-repeat;
+}
+
+/* the hover picture of the list never lingers over a passage between the two views */
+body.net #flottant {
+  opacity: 0 !important;
+  transition: none !important;
+}
+
+/* ---------- the sound of the main page: the same square button as in the player, at the foot on the right */
+#sonAccueil {
+  display: none;
+}
+body.temps #sonAccueil {
+  display: flex;
+  position: fixed;
+  right: 20px;
+  top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
+  z-index: 3;
+  transition: opacity .5s;
+}
+/* when the page opens a fine line travels once round the button, so the eye finds it, then it fades */
+#sonAccueil .tour {
+  position: absolute;
+  inset: -7px -8px;
+  width: calc(100% + 16px);
+  height: calc(100% + 14px);
+  overflow: visible;
+  pointer-events: none;
+}
+#sonAccueil .tour rect {
+  fill: none;
+  stroke: var(--encre);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  animation: tour 1.9s cubic-bezier(.6, 0, .2, 1) 1.1s forwards, tourFin .9s ease 3.4s forwards;
+}
+@keyframes tour {
+  from { stroke-dashoffset: 1; opacity: 1; }
+  to { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes tourFin {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #sonAccueil .tour { display: none; }
+}
+@media (max-width: 699px) {
+  /* on a phone the playing film does not dim the others: the strip keeps its light */
+  #piste.survol .vignette:not(.actif) img {
+    opacity: 1;
+  }
+}
+body.net #sonAccueil,
+body.net .filtres {
+  transition: none !important;
+}
+
+/* the film itself, with its sound, over its silent preview */
+#fenetre iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s;
+}
+#fenetre.son iframe.courant {
+  opacity: 1;
+}
+
+/* ---------- phone fixes: no film filters or strip/list switch on About and Contact, real tap targets, Contact title inside the margins */
+@media (max-width: 699px) {
+  body[data-vue="apropos"] .filtres,
+  body[data-vue="apropos"] .vues,
+  body[data-vue="contact"] .filtres,
+  body[data-vue="contact"] .vues {
+    opacity: 0;
+    pointer-events: none;
+    transition: none;
+  }
+  .vues button,
+  #cats button,
+  .qui {
+    position: relative;
+  }
+  .vues button::after,
+  #cats button::after,
+  .qui::after {
+    content: "";
+    position: absolute;
+    inset: -14px -8px;
+  }
+  #contact .grand .g {
+    font-size: 14.5vw;
+  }
+}
+
+/* ---------- intro: his name huge over cycling extracts, enter by button, swipe up or scroll */
+#intro { position: fixed; inset: 0; z-index: 100; background: #000; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); transition: transform .9s var(--e), opacity .9s; }
+#intro[hidden] { display: none; }
+#intro.sort { transform: translateY(-100%); opacity: .6; }
+#intro video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+#intro .voile { position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.65)); }
+#intro h1 { position: relative; margin: 0 0 14px; display: flex; flex-direction: column; align-items: flex-start; line-height: .9; white-space: nowrap; }
+#intro h1 .a { font: 800 20vw/.9 var(--sans); letter-spacing: -.055em; }
+#intro h1 .b { font: italic 400 22vw/.9 var(--serif); letter-spacing: -.02em; }
+#intro .role { position: relative; margin: 0 0 28px; color: #bbb; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+#intro .btn { position: relative; color: #fff; }
+#intro #introSon { position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px; }
+#intro #introEntrer { align-self: flex-start; }
+#intro .btn .k b { border-color: #fff; }
+body.intro-on { overflow: hidden; }
+@media (min-width: 700px) {
+  #intro { padding: 0 20px 28px; }
+}
+#intro .btn .mono { color: #fff; }
+
+/* the intro leaves like the strip leaves for the list: the picture closes into its foot line, the name sinks away */
+#intro .cadre { position: absolute; inset: 0; overflow: hidden; }
+#intro.sort { transform: none; opacity: 1; background: transparent; transition: none; }
+
+/* the name keeps clear of the role line (the p of Dupont drops below its baseline), and on a phone it is smaller, lifted 15px, with Enter on the right */
+#intro h1 { margin-bottom: 20px; }
+#intro h1 .b { padding-bottom: .24em; }
+@media (max-width: 699px) {
+  #intro h1 { margin-bottom: 35px; }
+  #intro #introEntrer { align-self: flex-end; }
+}
+@media (min-width: 700px) {
+  #intro h1 { margin-bottom: 26px; }
+}
+
+/* the name sits in the middle of the screen, the role line right under it, Enter pinned at the bottom */
+#intro { justify-content: center; }
+#intro h1 { margin-bottom: 20px; }
+#intro .role { margin-bottom: 0; }
+#intro #introEntrer { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 16px; }
+@media (max-width: 699px) { #intro #introEntrer { left: auto; right: 16px; } #intro h1 { margin-bottom: 35px; } }
+@media (min-width: 700px) { #intro #introEntrer { left: 20px; bottom: 28px; } #intro h1 { margin-bottom: 26px; } }
+
+/* ---------- phone held sideways: the text of About and Contact has room again (it was squeezed to nothing between the header and the giant title) */
+@media (min-width: 700px) and (max-height: 520px) {
+  .qui .salue,
+  .heures { display: none; }
+  .page .colonne {
+    top: 70px;
+    max-height: calc(100% - 70px - 24vh);
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .chapeau { font-size: 18px; line-height: 1.12; }
+  .listes { margin-top: 14px; }
+  .listes dd { font-size: 14px; }
+  .adresses { margin-top: 12px; }
+  .lien { padding-block: 6px; }
+  .page .logo-fd { display: none; }
+  .geste { margin-top: 10px; }
+}
+@media (min-width: 700px) and (max-height: 520px) {
+  body[data-vue="apropos"] .vues,
+  body[data-vue="contact"] .vues,
+  body[data-vue="apropos"] .filtres,
+  body[data-vue="contact"] .filtres { opacity: 0; pointer-events: none; transition: none; }
+  .page .geste { display: none; }
+  .page .colonne { top: 84px; max-height: calc(100% - 84px - 25vh); }
+}
+
+/* ---------- the name appears like a title card: letterbox opens, each line comes out of blur and tightens, a rule is drawn, the role follows */
+#intro h1 { --rh: 15px; margin-top: calc(var(--rh) + 35px); }   /* the role line hangs below, so the NAME itself sits on the centre */
+@media (min-width: 700px) { #intro h1 { margin-top: calc(var(--rh) + 26px); } }
+#intro h1 span { will-change: transform, opacity, filter; opacity: 0; }
+#intro.in h1 span { animation: titre 2.4s cubic-bezier(.16,1,.3,1) forwards; }
+#intro.in h1 .a { animation-delay: .55s; }
+#intro.in h1 .b { animation-delay: 1.05s; animation-duration: 2.6s; }
+@keyframes titre {
+  from { opacity: 0; filter: blur(14px); transform: translateY(.1em) scale(1.045); }
+  35%  { opacity: .9; }
+  to   { opacity: 1; filter: blur(0); transform: none; }
+}
+#intro .filet { position: relative; display: block; width: 100%; height: 1px; background: rgba(255,255,255,.55); margin: 0 0 13px; transform: scaleX(0); transform-origin: left; }
+#intro.in .filet { animation: filet 1.6s cubic-bezier(.65,0,.35,1) 2s forwards; }
+@keyframes filet { to { transform: scaleX(1); } }
+#intro .role { opacity: 0; }
+#intro.in .role { animation: apparait 1.4s ease 2.4s forwards; }
+@keyframes apparait { to { opacity: 1; } }
+#intro #introSon, #intro #introEntrer { opacity: 0; }
+#intro.in #introSon, #intro.in #introEntrer { animation: apparait 1.2s ease 2.8s forwards; }
+#intro .barre { position: absolute; left: 0; right: 0; height: 15vh; background: #000; z-index: 3; pointer-events: none; will-change: transform; }
+#intro .barre.h { top: 0; }
+#intro .barre.b { bottom: 0; }
+#intro.in .barre.h { animation: barreH 1.8s cubic-bezier(.65,0,.35,1) .1s forwards; }
+#intro.in .barre.b { animation: barreB 1.8s cubic-bezier(.65,0,.35,1) .1s forwards; }
+@keyframes barreH { to { transform: translateY(-101%); } }
+@keyframes barreB { to { transform: translateY(101%); } }
+#intro .cadre { will-change: clip-path; }
+@media (prefers-reduced-motion: reduce) {
+  #intro h1 span, #intro .filet, #intro .role, #intro #introSon, #intro #introEntrer { opacity: 1 !important; animation: none !important; transform: none !important; filter: none !important; }
+  #intro .barre { display: none; }
+}
+
+/* the question, then the name at the BOTTOM of the screen, Enter under it */
+#introQ { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; background: #000; transition: opacity .8s ease; }
+#introQ.part { opacity: 0; pointer-events: none; }
+#introQ p { margin: 0; color: #fff; font: italic 400 min(13vw, 72px)/1 var(--serif); letter-spacing: -.02em; }
+#introQ .rep { display: flex; gap: 28px; }
+#introQ .btn { color: #fff; }
+#intro:not(.in) #introSon, #intro:not(.in) #introEntrer { pointer-events: none; }
+#intro { justify-content: flex-end; padding-bottom: calc(86px + env(safe-area-inset-bottom)); }
+#intro h1, #intro .filet, #intro .role { translate: none !important; }
+#intro h1 { margin-top: 0; margin-bottom: 20px; }
+@media (max-width: 699px) { #intro h1 { margin-bottom: 35px; } }
+@media (min-width: 700px) { #intro h1 { margin-bottom: 26px; } #intro { padding-bottom: 92px; } }
+
+/* ---------- no sideways drag: on a phone the page must never pan, nothing may reach past the screen and leave white space */
+html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-action: pan-y; overscroll-behavior: none; }
+.page { overflow: hidden; }
+#intro, #film, #passage { max-width: 100vw; }
+@media (max-width: 699px) {
+  /* the name link in the header was a full-width box pushed 16px right: it reached past the screen and let the page pan */
+  .tete > .qui { position: absolute; left: 16px; width: auto; max-width: calc(100% - 200px); }
+}
+@media (max-width: 360px) { .lien { grid-template-columns: 84px 1fr auto; } .lien .v { font-size: 17px; } }
+
+/* the intro carries the site's logo itself, white on the extracts, as wide as the screen allows */
+#intro .intro-logo {
+  position: relative;
+  z-index: 1;
+  margin: 0 0 22px;
+}
+#intro .logo {
+  font-size: min(calc((100vw - 32px) / 6.95), 30vh);
+  color: #fff;
+}
+#intro .logo .pt,
+#intro .logo .pt::before {
+  background-color: #fff;
+}
+#intro .logo .pt::before {
+  background: repeating-linear-gradient(115deg, #fff 0 .045em, transparent .045em .08em);
+}
+
+/* ---------- the intro, bare: the extracts, the logo small, one word to enter */
+#intro { flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 0 20px calc(20px + env(safe-area-inset-bottom)); cursor: pointer; }
+#intro .barre, #intro .filet, #intro .role, #intro .voile { display: none; }
+#intro .intro-logo { margin: 0; }
+#intro .logo { font-size: clamp(30px, 3.4vw, 46px); }
+#intro #introEntrer { position: static; align-self: flex-end; z-index: 1; opacity: 1; animation: none; }
+#intro #introEntrer .mono { color: rgba(255, 255, 255, .75); font-size: 11px; letter-spacing: .14em; }
+#intro #introEntrer:hover .mono { color: #fff; }
+@media (max-width: 699px) {
+  #intro .logo { font-size: clamp(26px, 7.4vw, 34px); }
+}
+
+/* in the intro the logo is one white word, nothing else */
+#intro .logo .w1, #intro .logo .fl { color: #fff; }
+#intro .logo .pt { display: none; }
+
+/* sound: the same small word, left of Enter, toggling the extracts' own sound */
+#intro #introSon { position: absolute; top: auto; right: 150px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 1; opacity: 1; animation: none; }
+#intro #introSon .mono { color: rgba(255, 255, 255, .75); font-size: 11px; letter-spacing: .14em; }
+#intro #introSon:hover .mono, #intro #introSon.actif .mono { color: #fff; }
+
+/* the two intro buttons keep the site's squares: white line, filling on hover and when active */
+#intro .btn .k b { border-color: #fff; color: #fff; background-image: linear-gradient(#fff, #fff); }
+#intro .btn:hover .k b, #intro .btn.actif .k b { color: #000; }
+#intro #introSon .mono, #intro #introEntrer .mono { font-size: 10px; }
+
+/* 17 Oct (Flavyen): the name centred and huge, no dark filter on the extracts, hard 1 s cuts (intro.js) */
+#intro { flex-direction: column; align-items: center; justify-content: center; }
+#intro .intro-logo { margin: 0; }
+#intro .logo { font-size: min(calc((100vw - 40px) / 6.95), 30vh); }
+#intro #introEntrer { position: absolute; left: auto; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); }
+#intro .cadre, #intro video { background: none; }
+
+/* ---------- 19 Oct (Flavyen): one Contact page, the logo typeface in the header, no clapperboard, credit line */
+.logo .pt { display: none; }
+.qui .logo-fd { margin: 0; }
+.qui .logo { font-size: 22px; }
+@media (max-width: 699px) { .qui .logo { font-size: 17px; } }
+.tete .menu .btn[data-vue="apropos"] { display: none; }
+#contact .colonne { width: min(560px, calc(100% - 40px)); }
+#contact .logo-fd { margin-bottom: 26px; }
+#contact .chapeau { margin-bottom: 18px; }
+#contact .texte { font-size: 15px; line-height: 1.35; margin-top: 18px; }
+#contact .texte .mono { color: var(--gris); }
+#contact .listes { margin-top: 26px; }
+#contact .listes dd { font-size: 15px; }
+#contact .droite { position: absolute; right: 20px; top: 196px; width: min(460px, 36vw); opacity: 0; transition: opacity .5s; }
+body[data-vue="contact"] #contact .droite { opacity: 1; }
+#contact .droite > .mono { color: var(--gris); margin-bottom: 14px; }
+#contact .adresses { margin-top: 0; }
+@media (min-width: 900px) { #contact .lien { grid-template-columns: 90px 1fr auto; } #contact .lien .v { font-size: 19px; } }
+.credit { position: fixed; right: 20px; bottom: 14px; margin: 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; z-index: 5; pointer-events: none; }
+@media (max-width: 899px) {
+  #contact { overflow-y: auto; }
+  #contact .colonne { position: relative; top: 120px; left: 0; margin: 0 20px; }
+  #contact .droite { position: relative; top: 150px; right: auto; width: auto; margin: 0 20px 90px; }
+}
+
+/* the header rules for .qui span must not reach the letters of the logo */
+.qui .logo span { display: inline-block; margin: 0; color: inherit; font-size: inherit; line-height: inherit; }
+.qui .logo .c, .qui .logo .c span { color: inherit; }
+.qui .logo .w1, .qui .logo .w1 span, .qui .logo .fl { color: #8fa3c2; }
+.qui .logo .esp { display: block; width: .25em; }
+.qui .logo { display: inline-flex; }
+.qui .logo .pt { display: none; }
+
+#flottant video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .2s; }
+#flottant video.vivant { opacity: 1; }
+@media (min-width: 700px) {
+  #titres .t .g, #titres .t .i { margin: 0; padding: 0; height: auto; }
+  #titres .tp { height: 100%; justify-content: flex-end; }
+}
+
+/* ---------- 19 Oct: sound is a speaker icon (muted = crossed), the tile letters sit on solid tiles, a cue for the credits */
+.ico { display: inline-flex; width: 30px; height: 30px; border: 1px solid currentColor; align-items: center; justify-content: center; margin-right: 8px; }
+.ico svg { width: 18px; height: 18px; fill: currentColor; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+.ico .hp { stroke: none; }
+.ico .on, .ico .off { fill: none; }
+.ico .on { display: none; }
+.btn.actif .ico { background: currentColor; }
+.btn.actif .ico svg { fill: var(--papier, #fff); stroke: var(--papier, #fff); }
+.btn.actif .ico .hp { fill: var(--papier, #fff); }
+.btn.actif .ico .on { display: inline; }
+.btn.actif .ico .off { display: none; }
+#intro .ico { color: #fff; }
+#intro .btn.actif .ico svg, #intro .btn.actif .ico .hp { fill: #000; stroke: #000; }
+#intro .btn.actif .ico .hp { stroke: none; }
+#tTitre .tu { background: rgba(6, 6, 6, .8); }
+.indice { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); z-index: 3; color: var(--gris); letter-spacing: .12em; pointer-events: none; opacity: 0; white-space: nowrap; }
+#film.pret .indice { animation: indiceGen 6s ease 1.8s both; }
+#film.info .indice { display: none; }
+@keyframes indiceGen { 0%, 100% { opacity: 0; } 14%, 80% { opacity: 1; } }
+
+#intro .grille { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+#intro .intro-logo { position: relative; z-index: 2; }
+.indice { color: #fff; }
+#indiceContact { position: fixed; left: 20px; bottom: 14px; top: auto; transform: none; opacity: 0; transition: opacity .4s; color: var(--gris); animation: none; z-index: 5; }
+#indiceContact.visible { opacity: 1; }
+@media (min-width: 700px) {
+  #contact .colonne { top: 150px; max-height: calc(100% - 150px - 50px) !important; overflow-y: auto; scrollbar-width: none; }
+  #contact .droite { top: 150px; }
+}
+body[data-vue="contact"] .vues, body[data-vue="contact"] #cats, body[data-vue="contact"] #compte { opacity: 0; pointer-events: none; }
+#contact #heures2 { display: none; }
+
+.credit-in { display: none; }
+@media (max-width: 899px) { .credit-in { display: block; margin: 36px 0 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; } }
+@media (max-width: 699px) {
+  .credit { display: none; }
+  #cats button { font-size: 12px; }
+  #cats button sup { display: none; }
+}
+@media (max-width: 699px) { .vues button span { display: none; } }
+#indiceBande { position: fixed; right: 20px; top: 50%; z-index: 4; margin: 0; color: var(--gris); letter-spacing: .12em; font-size: 11px; pointer-events: none; opacity: 0; transition: opacity .5s; animation: souffle 2.2s ease-in-out infinite; }
+body[data-vue="bande"] #indiceBande:not(.vu) { opacity: 1; }
+@keyframes souffle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+@media (max-width: 699px) { #indiceBande { right: 16px; top: auto; bottom: 150px; } }
+
+body.temps #indiceBande { display: none; }
+
+/* ---------- Contact, well spaced: one grid, generous gaps between blocks */
+@media (min-width: 900px) {
+  #contact .colonne { top: 190px; width: min(600px, 46vw); max-height: calc(100% - 190px - 60px) !important; padding-bottom: 40px; }
+  #contact .chapeau { font-size: 36px; line-height: 1.08; margin: 0 0 34px; }
+  #contact .texte { font-size: 17px; line-height: 1.5; margin: 0; max-width: 560px; }
+  #contact .listes { margin-top: 52px; gap: 40px; }
+  #contact .listes dt { padding-bottom: 12px; margin-bottom: 14px; }
+  #contact .listes dd { font-size: 17px; line-height: 1.6; }
+  #contact .texte + .listes + .texte, #contact .listes + .texte { margin-top: 52px; }
+  #contact .listes + .texte .mono { display: block; margin-bottom: 10px; }
+  #contact .droite { top: 190px; width: min(520px, 34vw); }
+  #contact .droite > .mono { margin-bottom: 18px; }
+  #contact .lien { padding: 22px 12px 23px 0; grid-template-columns: 100px 1fr auto; }
+  #contact .lien .v { font-size: 22px; }
+}
+
+/* ---------- Contact scrolls as a page (no cropped text box): the header gets a soft white floor while it does */
+body[data-vue="contact"] #contact { overflow-y: auto; overflow-x: hidden; pointer-events: auto; scrollbar-width: none; }
+#contact::-webkit-scrollbar { display: none; }
+.tete::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 176px; pointer-events: none; opacity: 0; transition: opacity .4s;
+  background: linear-gradient(var(--papier) 74%, rgba(255, 255, 255, 0)); }
+body[data-vue="contact"] .tete::before { opacity: 1; }
+@media (min-width: 900px) {
+  #contact .colonne { position: relative; top: auto; left: auto; margin: 200px 0 140px 20px; max-height: none !important; overflow: visible; padding-bottom: 0; transform: none; }
+  #contact .droite { position: fixed; top: 200px; right: 20px; }
+}
+.lien { padding-left: 16px !important; padding-right: 16px !important; }
+.lien:hover { padding-left: 16px !important; }
+#contact .droite > .mono { padding-left: 16px; }
+
+/* a bright extract behind: the name and the two words go black */
+#intro.clair .logo, #intro.clair .logo .c, #intro.clair .logo .w1, #intro.clair .logo .fl { color: #000; }
+#intro.clair .logo .c span { color: #000; }
+#intro.clair .btn, #intro.clair .btn .mono { color: #000 !important; }
+#intro.clair .btn .k b, #intro.clair .ico { border-color: #000; }
+#intro.clair .ico svg { fill: #000; stroke: #000; }
+
+/* the credit line, on every page: a link that opens a mail to him */
+.credit { z-index: 30 !important; pointer-events: auto !important; cursor: pointer; transition: color .2s; }
+.credit:hover { color: var(--encre); }
+@media (max-width: 699px) {
+  .credit { display: block !important; right: 16px; bottom: 3px; font-size: 8px; letter-spacing: .05em; }
+  #titres { bottom: 16px !important; }
+}
+.btn:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
+
+/* the credit line belongs to the Contact page only */
+.credit { display: none !important; }
+body[data-vue="contact"] .credit { display: block !important; }
+
+/* the picture melting into the next one (Mario Roudil's transition): a canvas over the window while it runs */
+#fenetre canvas.dep { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; opacity: 0; }
+#fenetre canvas.dep.on { opacity: 1; }
+#fenetre.nb canvas.dep { filter: grayscale(1); }
+
+/* contact: the whole page scrolls to its very end, nothing cut at the foot */
+@media (min-width: 900px) { #contact .colonne { margin-bottom: 220px; } }
+#indiceContact { left: 50%; transform: translateX(-50%); bottom: 22px; }
+
+/* the playhead line: still most of the time, with a brief slight glitch now and then */
+.axe { animation: axeGlitch 5.5s steps(1, end) infinite; }
+@keyframes axeGlitch {
+  0%, 38%, 41%, 70%, 73%, 100% { transform: none; clip-path: none; }
+  38.5% { transform: translateX(2px); clip-path: inset(0 0 55% 0); }
+  39.2% { transform: translateX(-2px); clip-path: inset(40% 0 0 0); }
+  40% { transform: translateX(1px); clip-path: none; }
+  70.5% { transform: translateX(-1px); clip-path: inset(20% 0 30% 0); }
+  71.6% { transform: translateX(2px); clip-path: none; }
+}
+
+/* the name is the canvas now: white on dark pictures, turned black on bright ones */
+
+
+/* the finished name: a pane of frosted glass cut in the letters, with a fine light rim */
+#intro .verre { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .35s;
+  -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5) brightness(1.5); backdrop-filter: blur(18px) saturate(1.5) brightness(1.5);
+  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.12)); }
+#intro .verre.on { opacity: 1; }
+#intro canvas.grille.fond { opacity: 0; transition: opacity .35s .1s; }
+/* on a bright extract the glass tints dark instead of light, so the name stays readable without turning black or white */
+#intro.clair .verre { -webkit-backdrop-filter: blur(18px) saturate(1.3) brightness(.62); backdrop-filter: blur(18px) saturate(1.3) brightness(.62);
+  background: linear-gradient(180deg, rgba(0,0,0,.26), rgba(0,0,0,.1)); }
+
+/* Contact, scroll limited: the text scrolls only in the room under the header, between two soft edges (it fades out, it is never
+   cut by a hard line or hidden under the header), and stops exactly at the end of the text */
+@media (min-width: 900px) {
+  body[data-vue="contact"] #contact { top: 150px; bottom: 0; }
+  body[data-vue="contact"] .tete::before { opacity: 0; }
+  #contact { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 44px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 30px, #000 calc(100% - 44px), transparent 100%); overscroll-behavior: contain; }
+  #contact .colonne { margin: 40px 0 70px 20px; }
+  #contact .droite { top: 190px; }
+}
+
+/* Contact on a narrow screen: no big gap on top, the credit line at the end of the page (not floating over the email), aligned columns */
+.credit-in { display: none; }
+@media (max-width: 899px) {
+  .credit { display: none !important; }
+  .credit-in { display: block; margin: 36px 0 44px; color: var(--gris); font-size: 10px; letter-spacing: .08em; }
+  body[data-vue="contact"] #contact { overflow-y: auto; }
+  #contact .colonne { position: relative !important; top: 0 !important; left: 0 !important; margin: 104px 20px 0 !important; width: auto !important; max-height: none !important; overflow: visible !important; }
+  #contact .droite { position: relative !important; top: 0 !important; right: auto !important; width: auto !important; margin: 46px 20px 0 !important; opacity: 1 !important; }
+  #contact .droite > .mono { padding-left: 0 !important; }
+  #contact .lien { padding-left: 0 !important; padding-right: 0 !important; }
+  #contact .chapeau { font-size: 30px; margin-bottom: 22px; }
+  #contact .listes { margin-top: 34px; }
+  #contact .texte + .listes + .texte, #contact .listes + .texte { margin-top: 34px; }
+  #contact .colonne { padding-bottom: 0; }
+}
+
+/* the credit line belongs to the end of the Contact page: it sits under the last row with its own margin, never floating over it */
+.credit, body[data-vue="contact"] .credit { display: none !important; }
+.credit-in { display: block !important; margin: 34px 0 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; }
+@media (min-width: 900px) { #contact .droite { max-height: calc(100vh - 190px - 24px); overflow-y: auto; padding-bottom: 24px; scrollbar-width: none; } #contact .droite::-webkit-scrollbar { display: none; } }
+@media (max-width: 899px) { #contact .colonne { margin-top: 72px !important; } .credit-in { margin: 36px 0 48px; } }
+/* the plain logo is never shown in the intro (only measured): the frosted-glass name is the only version */
+#intro .intro-logo { opacity: 0 !important; }
+
+/* Contact scrolling, final: the page scrolls full height; the header sits on a soft white floor and the text slides under it
+   (no mask, no faded half-lines, no hard cut). Same on a phone. */
+body[data-vue="contact"] #contact { top: 0 !important; bottom: 0 !important; -webkit-mask-image: none !important; mask-image: none !important; }
+#contact { -webkit-mask-image: none !important; mask-image: none !important; }
+body[data-vue="contact"] .tete::before { opacity: 1 !important; height: 150px; background: linear-gradient(var(--papier) 0, var(--papier) 62%, rgba(255,255,255,0) 100%); }
+@media (max-width: 899px) { body[data-vue="contact"] .tete::before { height: 84px; background: linear-gradient(var(--papier) 0, var(--papier) 70%, rgba(255,255,255,0) 100%); } }
+@media (min-width: 900px) { #contact .colonne { margin-top: 170px; } #contact .droite { top: 170px; max-height: calc(100vh - 170px - 24px); } }
