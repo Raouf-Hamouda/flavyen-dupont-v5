@@ -2776,3 +2776,31 @@ body[data-vue="contact"] .menu { background: var(--papier); padding: 6px 8px 4px
   #contact .colonne { margin-bottom: 140px !important; }
 }
 @media (max-width: 899px) { #contact .droite { margin-bottom: 110px !important; } }
+
+/* =====================================================================================================
+   CONTACT, FINAL: one ordinary scrolling page. Everything is in the flow (no fixed or absolute column, no
+   inner scroll, no mask), so nothing can be cropped: the page scrolls as a whole to the very end, with
+   generous room at the bottom, and every line wraps inside the window width.
+   ===================================================================================================== */
+body[data-vue="contact"] #contact {
+  top: 0 !important; bottom: 0 !important; left: 0; right: 0;
+  overflow-x: hidden !important; overflow-y: auto !important;
+  display: grid !important; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 56px;
+  align-content: start; align-items: start;
+  padding: 176px 20px 180px !important; box-sizing: border-box;
+  -webkit-mask-image: none !important; mask-image: none !important;
+}
+#contact .colonne, #contact .droite {
+  position: static !important; inset: auto !important; transform: none !important;
+  width: auto !important; max-width: 100% !important; min-width: 0; margin: 0 !important;
+  max-height: none !important; overflow: visible !important; padding: 0 !important; opacity: 1 !important;
+}
+#contact .chapeau, #contact .texte, #contact .lien .v { overflow-wrap: anywhere; }
+#contact .lien .v { font-size: clamp(16px, 1.9vw, 22px); }
+#contact .droite > .mono { padding-left: 0 !important; }
+#contact .lien { padding-left: 0 !important; padding-right: 0 !important; }
+#contact .credit-in { margin: 34px 0 0 !important; }
+@media (max-width: 899px) {
+  body[data-vue="contact"] #contact { grid-template-columns: minmax(0, 1fr); gap: 46px; padding: 96px 20px 170px !important; }
+  #contact .chapeau { font-size: clamp(26px, 7vw, 34px); }
+}
