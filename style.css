@@ -2760,3 +2760,12 @@ body[data-vue="contact"] #contact { top: 0 !important; bottom: 0 !important; -we
 body[data-vue="contact"] .tete::before { opacity: 1 !important; height: 150px; background: linear-gradient(var(--papier) 0, var(--papier) 62%, rgba(255,255,255,0) 100%); }
 @media (max-width: 899px) { body[data-vue="contact"] .tete::before { height: 84px; background: linear-gradient(var(--papier) 0, var(--papier) 70%, rgba(255,255,255,0) 100%); } }
 @media (min-width: 900px) { #contact .colonne { margin-top: 170px; } #contact .droite { top: 170px; max-height: calc(100vh - 170px - 24px); } }
+
+/* Contact: nothing is cropped. The name block scrolls away with the page; only the two menu buttons stay, each on its own small solid chip. */
+body[data-vue="contact"] .tete::before { opacity: 0 !important; }
+body[data-vue="contact"] .qui, body[data-vue="contact"] #heures { transform: translateY(calc(-1 * var(--dy, 0px))); }
+body[data-vue="contact"] .menu { background: var(--papier); padding: 6px 8px 4px; margin: -6px -8px 0 0; z-index: 7; }
+.langues { display: flex; gap: 18px; margin: 0 0 22px; }
+.langues button { color: var(--gris); letter-spacing: .12em; padding: 6px 0; border-bottom: 1px solid transparent; cursor: pointer; }
+.langues button.actif { color: var(--encre); border-bottom-color: var(--encre); }
+@media (min-width: 900px) { .langues { margin-bottom: 26px; } }

@@ -28,6 +28,20 @@
     document.documentElement.lang = KO ? 'ko' : 'en';
     for (const e of document.querySelectorAll('[data-en]')) e.textContent = (KO && e.dataset.ko) || e.dataset.en;
   }
+  // the visitor chooses the language of the texts (FR / EN / 한국어); the choice is remembered, the browser's language is the default
+  const LANGUES = ['fr', 'en', 'ko'];
+  let langue = KO ? 'ko' : EN ? 'en' : 'fr';
+  try { const m = localStorage.getItem('lang'); if (LANGUES.includes(m)) langue = m; } catch (e) {}
+  for (const e of document.querySelectorAll('[data-en]')) e.dataset.fr = e.innerHTML;
+  function poserLangue(l) {
+    langue = l;
+    document.documentElement.lang = l;
+    for (const e of document.querySelectorAll('[data-en]')) {
+      if (l === 'fr') e.innerHTML = e.dataset.fr; else e.textContent = (l === 'ko' && e.dataset.ko) || e.dataset.en;
+    }
+    for (const b of document.querySelectorAll('#langues button')) b.classList.toggle('actif', b.dataset.l === l);
+    try { localStorage.setItem('lang', l); } catch (e) {}
+  }
   const vue = () => document.body.dataset.vue;
 
   // ---------------------------------------------------------------- content: his 25 projects, from donnees.js
@@ -1551,7 +1565,7 @@ void main(){
     const reste = pageContact.scrollHeight - pageContact.clientHeight - pageContact.scrollTop;
     indiceContact.classList.toggle('visible', vue() === 'contact' && !contactDefile && reste > 24);
   }
-  pageContact.addEventListener('scroll', function () { if (pageContact.scrollTop > 8) contactDefile = true; indiquerContact(); }, { passive: true });
+  pageContact.addEventListener('scroll', function () { if (pageContact.scrollTop > 8) contactDefile = true; document.body.style.setProperty('--dy', pageContact.scrollTop + 'px'); indiquerContact(); }, { passive: true });
   addEventListener('resize', indiquerContact);
   new MutationObserver(function () { contactDefile = false; pageContact.scrollTop = 0; setTimeout(indiquerContact, 700); }).observe(document.body, { attributes: true, attributeFilter: ['data-vue'] });
 
@@ -1642,6 +1656,8 @@ void main(){
     curser(dt);
     requestAnimationFrame(image);
   }
+  poserLangue(langue);
+  for (const b of document.querySelectorAll('#langues button')) b.addEventListener('click', () => poserLangue(b.dataset.l));
   construireFiltres();
   construireListe();
   voir('bande');
