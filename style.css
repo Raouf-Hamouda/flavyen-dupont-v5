@@ -2826,3 +2826,8 @@ body[data-vue="contact"] #contact { padding-bottom: 56px !important; }
 
 /* the wheel / trackpad scrolls the Contact page from anywhere on it, left or right (the page itself catches it, not only the left column) */
 body[data-vue="contact"] #contact, body[data-vue="contact"] #contact .colonne, body[data-vue="contact"] #contact .droite { pointer-events: auto !important; }
+
+/* hovered contact row: the black fill keeps real room around the text (the label no longer touches the edge of the black) */
+#contact .lien { transition: background-size .5s var(--e), color .3s, padding .4s var(--e); }
+#contact .lien:hover { padding-left: 16px !important; padding-right: 16px !important; }
+#contact .lien:hover .mono { color: rgba(255, 255, 255, .6); }
