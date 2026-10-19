@@ -2769,3 +2769,10 @@ body[data-vue="contact"] .menu { background: var(--papier); padding: 6px 8px 4px
 .langues button { color: var(--gris); letter-spacing: .12em; padding: 6px 0; border-bottom: 1px solid transparent; cursor: pointer; }
 .langues button.actif { color: var(--encre); border-bottom-color: var(--encre); }
 @media (min-width: 900px) { .langues { margin-bottom: 26px; } }
+
+/* Contact: proper room at the bottom. The contacts column scrolls with the page (no inner scroll), the last line always clears the window edge. */
+@media (min-width: 900px) {
+  #contact .droite { position: absolute !important; top: 170px; right: 20px; max-height: none !important; overflow: visible !important; padding-bottom: 0; }
+  #contact .colonne { margin-bottom: 140px !important; }
+}
+@media (max-width: 899px) { #contact .droite { margin-bottom: 110px !important; } }
