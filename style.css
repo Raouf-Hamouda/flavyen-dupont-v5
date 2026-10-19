@@ -2804,3 +2804,22 @@ body[data-vue="contact"] #contact {
   body[data-vue="contact"] #contact { grid-template-columns: minmax(0, 1fr); gap: 46px; padding: 96px 20px 170px !important; }
   #contact .chapeau { font-size: clamp(26px, 7vw, 34px); }
 }
+
+/* ---- phone: the whole header (name and the two menu buttons) scrolls away with the page, so nothing sits over the text; smaller type */
+@media (max-width: 899px) {
+  body[data-vue="contact"] .menu { transform: translateY(calc(-1 * var(--dy, 0px))); background: none; padding: 0; margin: 0; }
+  body[data-vue="contact"] #contact { padding-top: 112px !important; }
+  #contact .chapeau { font-size: clamp(22px, 6vw, 28px) !important; line-height: 1.12; }
+  #contact .texte { font-size: 14.5px; line-height: 1.42; }
+  #contact .listes dd { font-size: 15px; }
+  #contact .lien .v { font-size: 17px; }
+  #contact .lien { grid-template-columns: 78px 1fr auto; padding-top: 16px; padding-bottom: 16px; }
+}
+/* Clients: set like the two lists above it, a label over a fine rule, the names on tidy lines */
+#contact .clients { margin-top: 0; }
+#contact .clients .mono { display: block; color: var(--gris); padding-bottom: 12px; margin-bottom: 14px; border-bottom: 1px solid rgba(12, 12, 12, .16); }
+#contact .clients p, #contact .clients span.noms { display: block; font-size: 17px; line-height: 1.6; }
+
+/* the end of the Contact page: a normal, small breathing room under the credit line (no big empty block) */
+body[data-vue="contact"] #contact { padding-bottom: 56px !important; }
+@media (max-width: 899px) { body[data-vue="contact"] #contact { padding-bottom: 48px !important; } }
