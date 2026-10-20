@@ -1631,11 +1631,6 @@ body.leger .pose {
   .tcmd {
     gap: 12px;
   }
-  /* a thumb-sized scrub bar: the tiles of the film row are tall, not square */
-  #tTemps .tu {
-    aspect-ratio: auto;
-    height: 44px;
-  }
 }
 
 /* ---------- the small mark before the name */
