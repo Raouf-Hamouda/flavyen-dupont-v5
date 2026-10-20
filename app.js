@@ -1029,7 +1029,10 @@ void main(){
       anime(titres, [{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], { duration: 620, delay: DUREE_P - 700, easing: SORTIE });
       anime(fenetre, [{ opacity: 1, transform: FERME }, { opacity: 1, transform: OUVERT }], { duration: 700, delay: Math.max(0, DUREE_P - 860), easing: SORTIE });
     }
-    setTimeout(() => finir(vers, anims), DUREE_P);
+    // the whole passage plays 1.7x faster: same choreography, same order, about 40% less time
+    const VITESSE = 1.7;
+    anims.forEach(a => { a.playbackRate = VITESSE; });
+    setTimeout(() => finir(vers, anims), DUREE_P / VITESSE);
   }
   function finir(vers, anims) {
     // the target is only entered if nothing else moved the view during the passage
