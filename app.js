@@ -1461,13 +1461,36 @@ void main(){
   // one letter to a tile, an empty tile between words. If the whole title does not fit, the second half goes;
   // if the first half still does not fit, it is cut with an ellipsis. A word is never split in the middle.
   function ecrireTitre(d) {
-    const cases = [...tTitre.children], tour = ++tEcrit, N = cases.length;
+    const tour = ++tEcrit, N = NT, phone = innerWidth < 700;
     const lettres = (t, cls) => [...t].map(c => c === ' ' ? { t: '' } : { t: c, cls });
     const g = lettres(d.g, 'g'), x = d.lien ? [{ t: '' }, { t: d.lien, cls: 'x' }] : [], i = d.i ? [{ t: '' }, ...lettres(d.i, 'i')] : [];
-    // the whole title if it fits; else without the link sign; else the first part alone; else cut with an ellipsis. Never a dangling sign.
     let jetons = [g.concat(x, i), g.concat(i), g].find(l => l.length <= N);
-    if (!jetons) { jetons = g.slice(0, N - 1); jetons.push({ t: '…', cls: 'g' }); }
-    cases.forEach(function (c) { c.textContent = ''; c.className = 'tu'; });
+    if (phone) {
+      // on a phone the title keeps every letter: it wraps onto more rows of N square tiles, a word never split (4 rows at most)
+      const tout = g.concat(x, i), mots = [];
+      let cur = [];
+      for (const j of tout) { if (j.t === '') { if (cur.length) mots.push(cur); cur = []; } else cur.push(j); }
+      if (cur.length) mots.push(cur);
+      const lignes = [];
+      let ligne = [];
+      for (const m of mots) {
+        for (let k = 0; k < m.length; k += N) {
+          const w = m.slice(k, k + N);
+          if (ligne.length && ligne.length + 1 + w.length > N) { lignes.push(ligne); ligne = []; }
+          ligne = ligne.length ? ligne.concat({ t: '' }, w) : w.slice();
+        }
+      }
+      if (ligne.length) lignes.push(ligne);
+      if (lignes.length > 4) { lignes.length = 4; const l = lignes[3].slice(0, N - 1); l.push({ t: '…', cls: 'g' }); lignes[3] = l; }
+      jetons = lignes.flatMap(l => l.concat(Array(N - l.length).fill({ t: '' })));
+    } else if (!jetons) { jetons = g.slice(0, N - 1); jetons.push({ t: '…', cls: 'g' }); }
+    const voulu = Math.max(N, jetons.length);
+    if (tTitre.children.length !== voulu) {
+      tTitre.innerHTML = '';
+      for (let k = 0; k < voulu; k++) tTitre.appendChild(el('div', 'tu'));
+    }
+    const cases = [...tTitre.children];
+    cases.forEach(function (c, k) { c.textContent = ''; c.className = 'tu' + (k % N === 0 ? ' p' : '') + (k >= N ? ' r' : ''); });
     jetons.forEach(function (j, k) {
       setTimeout(function () {
         if (tour !== tEcrit) return;

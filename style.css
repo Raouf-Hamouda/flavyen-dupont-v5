@@ -3082,3 +3082,7 @@ body.intro-on .filtres { visibility: hidden; }
 /* the name in the credit line: bolder and blacker than the grey text around it */
 .credit a, .credit-in a { color: #0c0c0c; font-weight: 700; }
 .credit a:hover, .credit-in a:hover { color: #000; }
+
+/* a long title wraps onto more rows of square tiles (phones): each row closes its left edge, rows share their border */
+#tTitre .tu.p { border-left-width: 1px; }
+#tTitre .tu.r { margin-top: -1px; }
