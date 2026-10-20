@@ -3095,5 +3095,6 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
 @media (max-width: 699px) {
   .qui .salue { display: block !important; position: fixed; left: calc(16px + env(safe-area-inset-left)); top: 57px; margin: 0; font-size: 10.5px; line-height: 1; white-space: nowrap; color: var(--gris); }
   .heures { display: block !important; left: auto; right: calc(16px + env(safe-area-inset-right)); top: 58px; font-size: 8.5px; letter-spacing: 0; line-height: 1; white-space: nowrap; }
-  body[data-vue="contact"] .qui .salue, body[data-vue="contact"] .heures, body.intro-on .heures { display: none !important; }
+  body.intro-on .heures { display: none !important; }
 }
+@media (max-width: 699px) { body[data-vue="contact"] .qui .salue { left: 0; top: 41px; } }
