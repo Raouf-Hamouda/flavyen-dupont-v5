@@ -3086,3 +3086,7 @@ body.intro-on .filtres { visibility: hidden; }
 /* a long title wraps onto more rows of square tiles (phones): each row closes its left edge, rows share their border */
 #tTitre .tu.p { border-left-width: 1px; }
 #tTitre .tu.r { margin-top: -1px; }
+
+/* the Bande <-> Liste passage: both views must stay drawn while the script leads (the hidden-when-inactive rules only apply once it ends) */
+body.net #bande, body.net #liste, body.net #regle, body.net #titres, body.net .axe, body.net #lu, body.net #fenetre,
+body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, body.net #piste { visibility: visible !important; }
