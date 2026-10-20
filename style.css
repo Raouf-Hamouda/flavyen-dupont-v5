@@ -3083,3 +3083,7 @@ body.intro-on .filtres { visibility: hidden; }
 #contact .clients .noms b::after { content: none !important; }
 #contact .clients .noms b { display: inline-block; margin: 0 .9em .15em 0; }
 #contact .clients .noms .autres { display: inline-block; }
+
+/* the name in the credit line: bolder and blacker than the grey text around it */
+.credit a, .credit-in a { color: #0c0c0c; font-weight: 700; }
+.credit a:hover, .credit-in a:hover { color: #000; }
