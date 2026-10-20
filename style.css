@@ -2912,7 +2912,7 @@ body[data-vue="contact"] #contact {
   #contact .lien .v { font-size: 17px; }
   #contact .lien { grid-template-columns: 78px 1fr auto; padding-top: 16px; padding-bottom: 16px; }
   /* contacts first on phones: the email is on screen at once, the bio follows */
-  #contact .droite { order: -1; }
+  #contact .droite { order: 0; }
 }
 /* Clients: set like the two lists above it, a label over a fine rule, the names on tidy lines */
 #contact .clients { margin-top: 0; }
