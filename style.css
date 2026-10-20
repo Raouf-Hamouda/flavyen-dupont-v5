@@ -3015,7 +3015,7 @@ html[lang=ko] #contact .chapeau, html[lang=ko] #contact .texte { overflow-wrap: 
 #contact .droite, #contact .colonne { user-select: text; -webkit-user-select: text; }
 
 /* 20 Oct: every small control gets a real hit area without moving its look: 24px on a mouse, 44px on touch */
-#langues button, .menu .btn, .outils button, #retour, #qualite, #son, #info, #prec, #suiv, #pause { position: relative; }
+.vues button, #langues button, .menu .btn, .outils button, #retour, #qualite, #son, #info, #prec, #suiv, #pause { position: relative; }
 #langues button::after, .menu .btn::after, .outils button::after, #retour::after, #qualite::after, #son::after, #info::after, #prec::after, #suiv::after, #pause::after,
 .vues button::after, #introSon::after, #introEntrer::after { content: ""; position: absolute; inset: -6px -4px; }
 .outils input[type="range"] { height: 24px; }
