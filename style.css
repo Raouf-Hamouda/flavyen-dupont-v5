@@ -3098,3 +3098,5 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
   body.intro-on .heures { display: none !important; }
 }
 @media (max-width: 699px) { body[data-vue="contact"] .qui .salue { left: 0; top: 41px; } }
+/* phone: the clock takes the blank space between the name and the buttons, on two lines */
+@media (max-width: 699px) { .heures { right: calc(138px + env(safe-area-inset-right)); top: 22px; width: 100px; text-align: right; white-space: normal; font-size: 10px; line-height: 1.5; color: var(--gris); } }
