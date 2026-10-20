@@ -3090,3 +3090,10 @@ body.intro-on .filtres { visibility: hidden; }
 /* the Bande <-> Liste passage: both views must stay drawn while the script leads (the hidden-when-inactive rules only apply once it ends) */
 body.net #bande, body.net #liste, body.net #regle, body.net #titres, body.net .axe, body.net #lu, body.net #fenetre,
 body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, body.net #piste { visibility: visible !important; }
+
+/* 20 Oct: phone, the greeting and the Paris/Seoul clock come back as one thin line under the name (they were hidden), above the filters */
+@media (max-width: 699px) {
+  .qui .salue { display: block !important; position: fixed; left: calc(16px + env(safe-area-inset-left)); top: 57px; margin: 0; font-size: 10.5px; line-height: 1; white-space: nowrap; color: var(--gris); }
+  .heures { display: block !important; left: auto; right: calc(16px + env(safe-area-inset-right)); top: 58px; font-size: 8.5px; letter-spacing: 0; line-height: 1; white-space: nowrap; }
+  body[data-vue="contact"] .qui .salue, body[data-vue="contact"] .heures, body.intro-on .heures { display: none !important; }
+}
