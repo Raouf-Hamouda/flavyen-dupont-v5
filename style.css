@@ -3056,7 +3056,7 @@ body.intro-on .filtres { visibility: hidden; }
 }
 
 /* 20 Oct: Contact on a Mac/PC window fills its height: spacing and text follow the window height, no big empty band under the content */
-@media (min-width: 900px) and (min-height: 820px) {
+@media (min-width: 900px) and (min-height: 680px) {
   body[data-vue="contact"] #contact { padding-top: clamp(140px, 19vh, 230px) !important; }
   #contact .chapeau { margin-bottom: clamp(24px, 4vh, 48px) !important; }
   #contact .texte { font-size: clamp(17px, 2.15vh, 22px); line-height: 1.55; }
@@ -3067,13 +3067,19 @@ body.intro-on .filtres { visibility: hidden; }
   #contact .droite .clients { margin-top: clamp(36px, 7vh, 80px); }
   #contact .droite .credit-in { margin-top: clamp(28px, 4.5vh, 50px) !important; }
 }
-@media (min-width: 900px) and (min-height: 1000px) {
-  body[data-vue="contact"] #contact { padding-top: clamp(150px, 15vh, 200px) !important; }
-  #contact .chapeau { margin-bottom: clamp(24px, 3.2vh, 40px) !important; }
-  #contact .texte { font-size: clamp(17px, 1.8vh, 20px); }
-  #contact .listes { margin-top: clamp(40px, 5.5vh, 64px) !important; }
-  #contact .listes dd { font-size: clamp(17px, 1.8vh, 20px); line-height: 1.6; }
-  #contact .lien { padding-top: clamp(18px, 2.2vh, 26px) !important; padding-bottom: clamp(19px, 2.3vh, 27px) !important; }
-  #contact .droite .clients { margin-top: clamp(36px, 5vh, 56px); }
-  #contact .droite .credit-in { margin-top: clamp(28px, 3.2vh, 40px) !important; }
+
+/* zoomed wide screens (>=1900px): the column is already scaled 1.3x, so the height-driven spacing is divided by it */
+@media (min-width: 1900px) and (min-height: 820px) {
+  body[data-vue="contact"] #contact { padding-top: clamp(130px, 14vh, 190px) !important; }
+  #contact .chapeau { margin-bottom: clamp(20px, 3vh, 36px) !important; }
+  #contact .texte { font-size: clamp(16px, 1.65vh, 19px); }
+  #contact .listes { margin-top: clamp(32px, 6.5vh, 76px) !important; }
+  #contact .listes dd { font-size: clamp(16px, 1.65vh, 19px); line-height: 1.6; }
+  #contact .lien { padding-top: clamp(16px, 2.4vh, 26px) !important; padding-bottom: clamp(17px, 2.5vh, 27px) !important; }
+  #contact .droite .clients { margin-top: clamp(30px, 5.4vh, 60px); }
+  #contact .droite .credit-in { margin-top: clamp(22px, 3.4vh, 38px) !important; }
 }
+/* Clients: names side by side with room between them, no separator that can dangle at a line end */
+#contact .clients .noms b::after { content: none !important; }
+#contact .clients .noms b { display: inline-block; margin: 0 .9em .15em 0; }
+#contact .clients .noms .autres { display: inline-block; }
