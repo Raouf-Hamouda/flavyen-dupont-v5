@@ -33,11 +33,11 @@
       if (clair ? l < 120 : l > 160) { clair = !clair; el.classList.toggle('clair', clair); }
     } catch (e) {}
   };
-  setInterval(contraste, 90);
+  const ivContraste = setInterval(contraste, 90);
   const lance = (i) => { const v = vs[i]; v.src = `${DIR}${CLIPS[n++ % CLIPS.length]}.mp4`; v.currentTime = 0; return v.play().catch(() => {}); };
   const prochain = () => { const b = vs[1 - cur]; b.src = `${DIR}${CLIPS[n % CLIPS.length]}.mp4`; b.load(); };
   // every extract plays one second, then a hard cut: the next one is already loaded underneath
-  setInterval(() => {
+  const ivCoupe = setInterval(() => {
     const a = vs[cur]; if (!a.duration || document.hidden) return;
     if (a.currentTime >= COUPE && !a.dataset.passe) {
       a.dataset.passe = '1'; const b = vs[1 - cur]; n++;
@@ -47,8 +47,13 @@
       setTimeout(() => { a.dataset.passe = ''; const c = vs[1 - cur]; c.src = `${DIR}${CLIPS[n % CLIPS.length]}.mp4`; c.load(); }, 120);
     }
   }, 30);
+  // a clip that fails to load is skipped: point it at the next extract
+  vs.forEach(v => v.addEventListener('error', () => { if (!v.getAttribute('src')) return; v.src = `${DIR}${CLIPS[n++ % CLIPS.length]}.mp4`; v.load(); if (v === vs[cur]) v.play().catch(() => {}); }));
+  let onResize = null, rafStop = () => {};
   const demarre = () => {
-    lance(0).then(() => { vs[0].style.opacity = 1; }); prochain();
+    lance(0).then(() => { vs[0].style.opacity = 1; });
+    // the second buffer waits for the first clip to play
+    vs[0].addEventListener('playing', prochain, { once: true });
     // the name is the site's own logo, and it comes in the way it does everywhere else
     // The title reveal, rebuilt from the Instagram reel frame by frame.
     //  1. a wall of stacked two-line name blocks, tight, edge to edge; it draws itself in concentric rectangular rings,
@@ -62,11 +67,13 @@
     // The reel animation is parked for now (ANIME_NOM): the name shows at once, still, with the real f-l of the logo.
     const ANIME_NOM = true;
     cv.className = 'grille'; if (ANIME_NOM) { logo.before(cv); logo.style.opacity = 0; }
-    let rafNom = 0;
+    let rafNom = 0; rafStop = () => cancelAnimationFrame(rafNom);
     const jouer = (statique) => {
       if (!(window.logoFD && window.logoFD.pret)) return setTimeout(() => jouer(statique), 120);
       cancelAnimationFrame(rafNom);
+      if (el.hidden) return;
       const dpr = Math.min(devicePixelRatio || 1, 2), W = el.clientWidth, H = el.clientHeight;
+      if (!W || !H) return;
       cv.width = scn.width = Math.round(W * dpr); cv.height = scn.height = Math.round(H * dpr);
       const g = scn.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
       const px = 100; g.font = `800 ${px}px "Inter Tight"`; g.textBaseline = 'alphabetic';
@@ -89,7 +96,7 @@
       // the wall: 9 columns edge to edge, the rows share the height; a block fills most of its cell
       const COLS = 9, tw = W / COLS, s0 = (tw * .86) / bw;
       const nr = Math.max(7, Math.round(H / (bh * s0 * 1.18)) | 1), pasY = H / nr, mid = (nr - 1) / 2, cmid = (COLS - 1) / 2;
-      const sFin = Math.min(W * .66 / bw, H * .62 / bh);               // the final name: big, centred
+      const sFin = Math.min(W * (W < 700 ? .9 : .66) / bw, H * .62 / bh);               // the final name: big, centred
       const tuiles = [];
       for (let j = 0; j < nr; j++) for (let i = 0; i < COLS; i++) {
         const dx = i - cmid, dy = j - mid;
@@ -182,6 +189,7 @@ void main(){
       if (statique) { cv.style.transition = 'none'; cv.style.opacity = 0; verre.style.transition = 'none'; poserVerre(); }
       const T0 = performance.now() - (statique ? FINAL + 50 : 0);
       const dessine = (now) => {
+        if (!scn.width || !scn.height) return;
         const t = window.__fige != null ? window.__fige : now - T0, back = scene(t);
         if (prog) {
           gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT);
@@ -199,29 +207,33 @@ void main(){
       rafNom = requestAnimationFrame(dessine);
     };
     // only the finished name is kept: the frosted-glass two-line name, straight away, without the wall that builds up
-    if (ANIME_NOM) { jouer(true); let redim = 0; addEventListener('resize', () => { clearTimeout(redim); redim = setTimeout(() => jouer(true), 160); }); }
+    if (ANIME_NOM) { jouer(true); let redim = 0; onResize = () => { clearTimeout(redim); redim = setTimeout(() => jouer(true), 160); }; addEventListener('resize', onResize); }
   };
   document.body.classList.add('intro-on');
 
   // the extracts keep their own sound, with the heavy low Dunkirk-style bed very faint underneath
-  const bed = new Audio('riser.m4a'); bed.preload = 'auto'; bed.loop = true; bed.volume = .16;
+  // created on the first sound choice only, so its 500 KB is not fetched for visitors who stay silent
+  let bed = null;
+  const lit = () => { if (!bed) { bed = new Audio('riser.m4a'); bed.loop = true; } bed.currentTime = 0; bed.volume = .16; bed.play().catch(() => {}); };
   const NOMS = ['Sound', 'Sound on'];
   const son = el.querySelector('#introSon');
   son.addEventListener('click', (e) => {
     e.stopPropagation();
     mode = (mode + 1) % 2;
     vs.forEach(v => { v.muted = mode !== 1; v.volume = 1; });
-    if (mode === 1) { bed.currentTime = 0; bed.volume = .16; bed.play().catch(() => {}); } else bed.pause();
-    son.classList.toggle('actif', mode > 0);
+    if (mode === 1) { lit(); const o = vs[1 - cur]; if (o.paused && o.getAttribute('src')) o.play().then(() => o.pause()).catch(() => {}); } else bed && bed.pause(); // unlock the idle clip's audio inside this gesture (iOS)
+    son.classList.toggle('actif', mode > 0); son.setAttribute('aria-pressed', mode > 0);
     son.querySelector('.mono').textContent = NOMS[mode];
   });
+
+  // a hidden tab or a locked phone must not keep sounding; it comes back with the tab
+  document.addEventListener('visibilitychange', () => { if (!bed || el.hidden) return; if (document.hidden) bed.pause(); else if (mode === 1) bed.play().catch(() => {}); });
 
   // the name is fitted to the width, line by line, so it can never be cropped
   const lignes = [...el.querySelectorAll('h1 span')];
   const ajuste = () => {
     const L = el.clientWidth - 32;
     lignes.forEach(l => { l.style.fontSize = '100px'; l.style.fontSize = (100 * L / l.getBoundingClientRect().width * .985) + 'px'; });
-    if (innerWidth < 700) lignes.forEach(l => l.style.fontSize = parseFloat(l.style.fontSize) * .86 + 'px');
     if (innerWidth >= 700) { const m = Math.min(...lignes.map(l => parseFloat(l.style.fontSize))); const k = Math.min(1, (innerHeight * .46) / (m * 1.9)); lignes.forEach(l => l.style.fontSize = parseFloat(l.style.fontSize) * k + 'px'); }
   };
   // no question: it starts at once, silent (a browser only lets sound start from a tap: the Sound button does it)
@@ -234,8 +246,8 @@ void main(){
     if (started) return; started = true;
     mode = oui ? 1 : 0;
     vs.forEach(v => { v.muted = !oui; v.volume = 1; });
-    son.classList.toggle('actif', oui); son.querySelector('.mono').textContent = NOMS[mode];
-    if (oui) { bed.currentTime = 0; bed.volume = .16; bed.play().catch(() => {}); }
+    son.classList.toggle('actif', oui); son.setAttribute('aria-pressed', !!oui); son.querySelector('.mono').textContent = NOMS[mode];
+    if (oui) lit();
         demarre(); el.classList.add('in');
   };
 
@@ -244,7 +256,7 @@ void main(){
   let out = false;
   const enter = () => {
     if (out) return; out = true;
-    const fondu = setInterval(() => { vs.forEach(x => x.volume = Math.max(0, x.volume - .06)); bed.volume = Math.max(0, bed.volume - .02); if (vs[0].volume <= 0) { clearInterval(fondu); bed.pause(); } }, 50);
+    const fondu = setInterval(() => { vs.forEach(x => x.volume = Math.max(0, x.volume - .06)); if (bed) bed.volume = Math.max(0, bed.volume - .02); if (Math.max(vs[0].volume, vs[1].volume) <= 0) { clearInterval(fondu); bed && bed.pause(); } }, 50);
     const DOUX = 'cubic-bezier(.65,0,.35,1)', SORTIE = 'cubic-bezier(.22,1,.36,1)', cadre = el.querySelector('.cadre');
     const mine = [];
     const a = (e, f, o) => { if (!e) return; const x = e.animate(f, Object.assign({ fill: 'both' }, o)); mine.push(x); return x; };
@@ -268,7 +280,7 @@ void main(){
     ['.axe', '#lu', '#regle', '.tete'].forEach(q => document.querySelectorAll(q).forEach(e => a(e, [{ opacity: 0 }, { opacity: 1 }], { duration: 420, delay: D - 520 })));
     a(titres, [{ opacity: 0, transform: 'translateY(26px)' }, { opacity: 1, transform: 'none' }], { duration: 620, delay: D - 700, easing: SORTIE });
     a(fen, [{ opacity: 1, transform: 'translateX(-50%) scaleY(0)' }, { opacity: 1, transform: 'translateX(-50%) scaleY(1)' }], { duration: 700, delay: D - 860, easing: SORTIE });
-    setTimeout(() => { el.hidden = true; vs.forEach(x => { x.pause(); x.removeAttribute('src'); x.load(); }); bed.pause(); mine.forEach(x => x.cancel()); }, D + 100);
+    setTimeout(() => { el.hidden = true; vs.forEach(x => { x.pause(); x.removeAttribute('src'); x.load(); }); bed && bed.pause(); mine.forEach(x => x.cancel()); clearInterval(ivContraste); clearInterval(ivCoupe); onResize && removeEventListener('resize', onResize); rafStop(); }, D + 100);
   };
   el.querySelector('#introEntrer').addEventListener('click', (e) => { e.stopPropagation(); enter(); });
   // a tap anywhere enters
@@ -276,7 +288,7 @@ void main(){
   addEventListener('keydown', e => {
     if (el.hidden) return;
     if (!started) return;
-    if (e.key === 'Enter') { e.preventDefault(); enter(); }
+    if (e.key === 'Enter' && !e.ctrlKey && !e.metaKey && !e.altKey && !e.target.closest('button, a')) { e.preventDefault(); enter(); }
   });
   let y0 = null;
   el.addEventListener('touchstart', e => { y0 = e.touches[0].clientY; }, { passive: true });

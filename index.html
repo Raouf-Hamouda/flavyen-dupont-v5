@@ -4,20 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Flavyen Dupont · Director &amp; Art Director</title>
+<meta name="description" content="Flavyen Dupont, director and art director between Paris and Seoul. Films, commercials and music videos.">
+<meta name="theme-color" content="#000">
+<!-- TODO: replace example.com with the production domain -->
+<link rel="canonical" href="https://raouf-hamouda.github.io/flavyen-dupont-v5/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Flavyen Dupont · Director &amp; Art Director">
+<meta property="og:description" content="Director and art director between Paris and Seoul. Films, commercials and music videos.">
+<meta property="og:url" content="https://raouf-hamouda.github.io/flavyen-dupont-v5/">
+<meta property="og:image" content="https://raouf-hamouda.github.io/flavyen-dupont-v5/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;700;800&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;700;800&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;700;800&family=Noto+Sans+KR:wght@500;700;900&display=swap" rel="stylesheet"></noscript>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="stylesheet" href="style.css?v=20261021f">
+<link rel="stylesheet" href="style.css?v=20261021zz">
 <style>html{background:#000}</style>
 </head>
 <body data-vue="bande">
 
 <div id="intro">
   <i class="barre h"></i><i class="barre b"></i>
-  <div class="cadre"><video muted playsinline preload="auto"></video><div class="voile"></div></div>
+  <div class="cadre"><video muted playsinline preload="metadata"></video><div class="voile"></div></div>
   <div class="logo-fd intro-logo" data-logo></div>
   <i class="filet"></i>
   <p class="role mono">Director &amp; Art Director · Paris · Seoul</p>
@@ -26,10 +37,11 @@
 </div>
 
 <header class="tete">
-  <a class="qui" id="accueil"><b class="logo-fd" data-logo></b><span>Director &amp; Art Director</span><span class="salue">Bonjour · Hi · 안녕하세요</span></a>
-  <nav class="vues mono"><button data-vue="bande"><i class="pb"><b></b><b></b><b></b></i><span data-en="Strip">Bande</span></button><button data-vue="liste"><i class="pl"><b></b><b></b><b></b></i><span data-en="List">Liste</span></button></nav>
+  <h1 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap">Flavyen Dupont, Director &amp; Art Director</h1>
+  <a class="qui" id="accueil" aria-label="Flavyen Dupont"><b class="logo-fd" aria-hidden="true" data-logo></b><span>Director &amp; Art Director</span><span class="salue">Bonjour · Hi · 안녕하세요</span></a>
+  <nav class="vues mono" aria-label="View"><button data-vue="bande" aria-label="Strip" aria-pressed="false"><i class="pb"><b></b><b></b><b></b></i><span data-en="Strip" data-ko="스트립">Bande</span></button><button data-vue="liste" aria-label="List" aria-pressed="false"><i class="pl"><b></b><b></b><b></b></i><span data-en="List" data-ko="리스트">Liste</span></button></nav>
   <div class="filtres"><sup id="compte"></sup><div id="cats"></div></div>
-  <nav class="menu">
+  <nav class="menu" aria-label="Main">
     <button class="btn" data-vue="bande"><span class="k"><b>작</b><b>품</b></span><span class="mono">Films</span></button>
     <button class="btn" data-vue="contact"><span class="k"><b>연</b><b>락</b></span><span class="mono">Contact</span></button>
   </nav>
@@ -40,8 +52,8 @@
 <section id="bande"><div id="piste"></div></section>
 <canvas id="regle"></canvas>
 <div class="outils mono" id="outils">
-  <div class="ctl"><span data-en="Zoom">Zoom</span><button data-z="0.714">−</button><input type="range" id="zoomR" min="-1.05" max="1.61" step="0.01" value="0" aria-label="Zoom"><button data-z="1.4">+</button></div>
-  <div class="ctl"><span data-en="Height">Hauteur</span><input type="range" id="hautR" min="52" max="160" step="1" value="66" aria-label="Track height"></div>
+  <div class="ctl"><span data-en="Zoom" data-ko="줌">Zoom</span><button data-z="0.714" aria-label="Zoom out">−</button><input type="range" id="zoomR" min="-1.05" max="1.61" step="0.01" value="0" aria-label="Zoom"><button data-z="1.4" aria-label="Zoom in">+</button></div>
+  <div class="ctl"><span data-en="Height" data-ko="높이">Hauteur</span><input type="range" id="hautR" min="52" max="160" step="1" value="66" aria-label="Track height"></div>
   <p class="aide" id="aide"></p>
 </div>
 <div id="poignee"></div>
@@ -56,19 +68,6 @@
 
 <div id="titres"><div id="rouleau"></div></div>
 
-<section id="apropos" class="page">
-  <div class="colonne">
-    <div class="logo-fd" data-logo></div>
-    <p class="chapeau">I’m Flavyen Dupont, a Director &amp; Art Director, but also Motion Designer, Editor and Producer. I have worked in digital, cinema and television.</p>
-    <div class="listes">
-      <dl><dt class="mono" data-en="Roles">Rôles</dt><dd>Director</dd><dd>Art Director</dd><dd>Motion Designer</dd><dd>Editor</dd><dd>Producer</dd></dl>
-      <dl><dt class="mono" data-en="With">Avec</dt><dd>Google</dd><dd>YouTube</dd><dd>Coway</dd><dd>Hyundai</dd><dd>Samyang</dd><dd>DCMJ</dd><dd>Mentorshow</dd><dd>Deezer</dd></dl>
-    </div>
-    <p class="geste mono" id="geste"></p>
-  </div>
-  <div class="grand"><div class="tl"><span class="g">About</span><span class="salut"><span class="tour" id="tour"><i>Bonjour.</i><i>Hi.</i><i class="ko">안녕하세요.</i><i>Buongiorno.</i><i>Bonjour.</i></span></span></div></div>
-</section>
-<div id="trainee"></div>
 
 <section id="contact" class="page">
   <div class="colonne">
@@ -84,14 +83,14 @@
     <p class="mono" data-en="Let’s meet" data-ko="연락하기">Prenons contact</p>
     <div class="langues mono" id="langues" role="group" aria-label="Language"><button data-l="fr">FR</button><button data-l="en">EN</button><button data-l="ko">한국어</button></div>
     <div class="adresses">
-      <a class="lien" id="courriel" data-copie="flavyen.dupont@hotmail.com"><span class="mono">Email</span><span class="v">flavyen.dupont@hotmail.com</span><span class="mono f" data-en="Copy" data-ko="복사">Copier</span></a>
+      <a class="lien" id="courriel" href="mailto:flavyen.dupont@hotmail.com" data-copie="flavyen.dupont@hotmail.com"><span class="mono">Email</span><span class="v">flavyen.dupont@hotmail.com</span><span class="mono f" aria-live="polite" data-en="Copy" data-ko="복사">Copier</span></a>
       <a class="lien" href="https://www.instagram.com/flavyen_d/" target="_blank" rel="noopener"><span class="mono">Instagram</span><span class="v">@flavyen_d</span><span class="mono f">↗</span></a>
-      <a class="lien" href="https://vimeo.com/user74346532" target="_blank" rel="noopener"><span class="mono">Vimeo</span><span class="v">user74346532</span><span class="mono f">↗</span></a>
+      <a class="lien" href="https://vimeo.com/user74346532" target="_blank" rel="noopener"><span class="mono">Vimeo</span><span class="v">Flavyen Dupont</span><span class="mono f">↗</span></a>
       <a class="lien" href="https://www.imdb.com/fr/name/nm17439350/" target="_blank" rel="noopener"><span class="mono">IMDb</span><span class="v">Flavyen Dupont</span><span class="mono f">↗</span></a>
     </div>
     <p class="geste mono" id="heures2"></p>
-    <div class="texte clients"><span class="mono" data-en="Clients" data-ko="클라이언트">Mes clients</span><span class="noms">Karmine Corp, Orange, Hyundai, Red Bull, YouTube, Samyang, Google, Helidya, Mentorshow, DS Automobile<span data-en=" and others." data-ko=" 외 다수."> et autres.</span></span></div>
-    <a class="credit-in mono" href="mailto:raoufhmmouda1@gmail.com" data-en="2026 © All rights reserved · Created by Raouf Hamouda" data-ko="2026 © 모든 권리 보유 · Created by Raouf Hamouda">2026 © Tous droits réservés · Created by Raouf Hamouda</a>
+    <div class="texte clients"><span class="mono" data-en="Clients" data-ko="클라이언트">Clients</span><span class="noms"><b>Karmine Corp</b><b>Orange</b><b>Hyundai</b><b>Red Bull</b><b>YouTube</b><b>Samyang</b><b>Google</b><b>Helidya</b><b>Mentorshow</b><b>DS Automobile</b><span class="autres" data-en="and others" data-ko="외 다수">et autres</span></span></div>
+    <p class="credit-in mono"><span data-en="2026 © All rights reserved · Created by " data-ko="2026 © 모든 권리 보유 · Created by ">2026 © Tous droits réservés · Created by </span><a href="mailto:raoufhmmouda1@gmail.com">Raouf Hamouda</a></p>
   </div>
 </section>
 
@@ -104,11 +103,11 @@
   <p class="indice mono" id="indiceGen" data-en="↓ Scroll for the credits" data-ko="↓ 스크롤하면 크레딧">↓ Faites défiler : les crédits</p>
   <div id="generique"><div class="roule" id="fiche"></div></div>
   <div class="ui haut">
-    <button class="btn" id="retour"><span class="k"><b>닫</b><b>기</b></span><span class="mono" data-en="Close">Fermer</span></button>
+    <button class="btn" id="retour"><span class="k"><b>닫</b><b>기</b></span><span class="mono" data-en="Close" data-ko="닫기">Fermer</span></button>
     <div class="droite">
       <button class="btn" id="qualite"><span class="k"><b>화</b><b>질</b></span><span class="mono" id="qualiteTxt">Auto</span></button>
-      <button class="btn" id="son" aria-label="Sound"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="hp" d="M3 9v6h4l5 4V5L7 9H3z"/><g class="on"><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.3 5.7a9 9 0 0 1 0 12.6"/></g><g class="off"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g></svg></span><span class="mono" id="sonTxt" data-en="Muted">Son coupé</span></button>
-      <button class="btn" id="info"><span class="k"><b>제</b><b>작</b><b>진</b></span><span class="mono" data-en="Credits">Crédits</span></button>
+      <button class="btn" id="son" aria-label="Sound"><span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="hp" d="M3 9v6h4l5 4V5L7 9H3z"/><g class="on"><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.3 5.7a9 9 0 0 1 0 12.6"/></g><g class="off"><path d="M16 9.5l5 5M21 9.5l-5 5"/></g></svg></span><span class="mono" id="sonTxt">Son coupé</span></button>
+      <button class="btn" id="info"><span class="k"><b>제</b><b>작</b><b>진</b></span><span class="mono" data-en="Credits" data-ko="제작진">Crédits</span></button>
     </div>
   </div>
   <div class="ui bas">
@@ -119,21 +118,22 @@
       <div class="rangee" id="tTemps"></div>
     </div>
     <div class="tcmd">
-      <button class="btn" id="prec"><span class="k"><b>이</b><b>전</b></span><span class="mono" data-en="Previous">Précédent</span></button>
-      <button class="btn" id="suiv"><span class="k"><b>다</b><b>음</b></span><span class="mono" data-en="Next">Suivant</span></button>
+      <button class="btn" id="prec"><span class="k"><b>이</b><b>전</b></span><span class="mono" data-en="Previous" data-ko="이전">Précédent</span></button>
+      <button class="btn" id="suiv"><span class="k"><b>다</b><b>음</b></span><span class="mono" data-en="Next" data-ko="다음">Suivant</span></button>
       <button class="btn" id="pause"><span class="k"><b>멈</b><b>춤</b></span><span class="mono" id="pauseTxt">Pause</span></button>
     </div>
   </div>
 </section>
 
-<a class="credit mono" href="mailto:raoufhmmouda1@gmail.com" data-en="2026 © All rights reserved · Created by Raouf Hamouda" data-ko="2026 © 모든 권리 보유 · Created by Raouf Hamouda">2026 © Tous droits réservés · Created by Raouf Hamouda</a>
+<p class="credit mono"><span data-en="2026 © All rights reserved · Created by " data-ko="2026 © 모든 권리 보유 · Created by ">2026 © Tous droits réservés · Created by </span><a href="mailto:raoufhmmouda1@gmail.com">Raouf Hamouda</a></p>
+<p class="droits mono" data-en="© All rights reserved" data-ko="© 모든 권리 보유">© Tous droits réservés</p>
 <p class="mono" id="indiceBande" data-en="Scroll ↓" data-ko="스크롤 ↓">Faites défiler ↓</p>
 <div id="curseur"></div>
 
 <script src="https://player.vimeo.com/api/player.js" async></script>
-<script src="donnees.js?v=20261021f" defer></script>
-<script src="logo.js?v=20261021f" defer></script>
-<script src="intro.js?v=20261021f" defer></script>
-<script src="app.js?v=20261021f" defer></script>
+<script src="donnees.js?v=20261021zz" defer></script>
+<script src="logo.js?v=20261021zz" defer></script>
+<script src="intro.js?v=20261021zz" defer></script>
+<script src="app.js?v=20261021zz" defer></script>
 </body>
 </html>

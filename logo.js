@@ -73,8 +73,12 @@
     logo.appendChild(document.createElement('span')).className = 'pt';
     const x0 = Math.min(0, M.cbL), h = M.A + 2;
     path.setAttribute('d', tracer());
-    svg.setAttribute('viewBox', `${x0} ${-h} ${M.avance - x0} ${h}`);
-    svg.style.width = (M.avance - x0) / T + 'em';
+    // the drawing can reach past the advance of the two letters (crossbar, tail of the l): size the box on the drawing
+    // itself and give the extra back as a negative margin, so the next letter does not move
+    const x1 = Math.max(M.avance, M.ls1, M.cbR) + 2;
+    svg.setAttribute('viewBox', `${x0} ${-h} ${x1 - x0} ${h}`);
+    svg.style.width = (x1 - x0) / T + 'em';
+    svg.style.marginRight = (M.avance - x1) / T + 'em';
     svg.style.height = h / T + 'em';
     svg.style.marginLeft = x0 / T + 'em';
   }
@@ -95,7 +99,10 @@
   // built once now so the page is never empty, and built again, right, the moment the font lands
   let construit = false;
   const lancer = function () {
-    M = mesurer();
+    const m = mesurer();
+    // a re-run after the font landed only rebuilds if the measurement really changed
+    if (construit && JSON.stringify(m) === JSON.stringify(M)) return;
+    M = m;
     document.querySelectorAll('[data-logo]').forEach(function (l) {
       if (construit) { l.innerHTML = ''; l.classList.remove('logo', 'joue'); }
       construire(l);
@@ -108,8 +115,9 @@
   else {
     document.fonts.load('800 100px "Inter Tight"', 'flavyen dupont').catch(function () {}).then(function () {
       lancer();
-      if (!police()) document.fonts.ready.then(function () { if (police()) lancer(); });
+      document.fonts.ready.then(function () { if (police()) lancer(); });
     });
-    document.fonts.addEventListener('loadingdone', function () { if (construit && police()) lancer(); }, { once: true });
+    // every font batch that lands (subsets load separately) may change the glyph measurements
+    document.fonts.addEventListener('loadingdone', function () { if (construit && police()) lancer(); });
   }
 })();

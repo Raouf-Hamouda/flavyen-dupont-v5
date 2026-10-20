@@ -1,7 +1,7 @@
 :root {
   --encre: #0c0c0c;
   --papier: #fff;
-  --gris: #9b9b9b;
+  --gris: #6b6b6b;
   --w: 225px;
   --h: calc(var(--w) / 1.5);
   --milieu: calc(50% - 3vh);
@@ -58,7 +58,7 @@ button {
   top: 22px;
 }
 .qui {
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   display: flex;
   gap: 10px;
 }
@@ -70,7 +70,7 @@ button {
 }
 /* the view switch: two small drawings of the layout, with their word */
 .vues {
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   top: 118px;
   display: flex;
   gap: 18px;
@@ -105,10 +105,12 @@ button {
   transition: color .25s;
 }
 .vues button.actif,
-.vues button:hover,
-#cats button.actif,
-#cats button:hover {
+#cats button.actif {
   color: var(--encre);
+}
+@media (hover: hover) {
+  .vues button:hover,
+  #cats button:hover { color: var(--encre); }
 }
 .filtres {
   left: 36%;
@@ -136,7 +138,7 @@ button {
   background-size: 100% 1px;
 }
 #cats sup {
-  font-size: 8px;
+  font-size: 10px;
   line-height: 1;
   letter-spacing: .04em;
 }
@@ -170,28 +172,33 @@ button {
 .btn .k b:nth-child(3) {
   transition-delay: .1s;
 }
-.btn:hover .k b,
 .btn.actif .k b {
   background-size: 100% 100%;
   color: var(--papier);
 }
+@media (hover: hover) {
+  .btn:hover .k b { background-size: 100% 100%; color: var(--papier); }
+}
 .btn .mono {
   color: var(--gris);
+  font-size: 11px;
   transition: color .3s;
 }
-.btn:hover .mono,
 .btn.actif .mono {
   color: var(--encre);
 }
+@media (hover: hover) {
+  .btn:hover .mono { color: var(--encre); }
+}
 .menu {
-  right: 20px;
+  right: calc(20px + env(safe-area-inset-right));
   top: 16px !important;
   display: flex;
   gap: 22px;
 }
 .heures {
   position: fixed;
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   top: 76px;
   color: var(--gris);
   z-index: 6;
@@ -339,12 +346,15 @@ body:not([data-vue="bande"]) #poignee {
   opacity: 0;
   transform: translateY(26px);
   pointer-events: none;
+  /* visibility leaves the tab order and the accessibility tree once the fade is done */
+  visibility: hidden;
+  transition: opacity .5s, transform .7s var(--e), visibility 0s .7s;
 }
 
 /* ---------- the foot of the page: the title of the film under the playhead, rolling like a counter */
 #titres {
   position: fixed;
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   right: 0;
   bottom: .6vw;
   height: 16.5vw;
@@ -386,10 +396,10 @@ body:not([data-vue="bande"]) #poignee {
 /* ---------- list */
 #liste {
   position: fixed;
-  left: 20px;
-  right: 20px;
+  left: calc(20px + env(safe-area-inset-left));
+  right: calc(20px + env(safe-area-inset-right));
   top: 172px;
-  bottom: 20px;
+  bottom: calc(38px + env(safe-area-inset-bottom)); /* stops above the fixed © line */
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -397,16 +407,19 @@ body:not([data-vue="bande"]) #poignee {
   opacity: 0;
   pointer-events: none;
   transform: translateY(-18px);
-  transition: opacity .5s, transform .7s var(--e);
+  visibility: hidden;
+  transition: opacity .5s, transform .7s var(--e), visibility 0s .7s;
 }
 body[data-vue="liste"] #liste {
+  visibility: visible;
+  transition-delay: 0s;
   opacity: 1;
   pointer-events: auto;
   transform: none;
 }
 .rang {
   display: grid;
-  grid-template-columns: 70px minmax(260px, 1.5fr) minmax(160px, 1fr) 90px 50px;
+  grid-template-columns: 70px minmax(0, 1.5fr) minmax(160px, 1fr) 130px 50px;
   column-gap: 18px;
   align-items: baseline;
   padding: 7px 0 8px;
@@ -425,10 +438,14 @@ body[data-vue="liste"] #liste {
   align-items: baseline;
   gap: 9px;
   white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
   transition: transform .45s var(--e);
 }
+@media (hover: hover) and (pointer: fine) {
 .rang:hover .titre {
   transform: translateX(14px);
+}
 }
 .rang .x,
 .t .x,
@@ -440,11 +457,24 @@ body[data-vue="liste"] #liste {
 .rang .x {
   font-size: 12px;
 }
+.rang .cat {
+  white-space: nowrap;
+}
+.rang .titre .i {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .rang .role {
   color: var(--gris);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* sous 1000px le rôle est masqué: le titre prend la place (sinon il se tronque) */
+@media (max-width: 1000px) {
+  .rang { grid-template-columns: 70px minmax(0, 1fr) 130px 50px; }
+  .rang .role { display: none; }
 }
 .rang .g {
   font: 700 24px/1 var(--sans);
@@ -488,7 +518,7 @@ body[data-vue="liste"] #liste {
 .fiche {
   --encre: #0c0c0c;
   --papier: #fff;
-  --gris: #9b9b9b;
+  --gris: #6b6b6b;
 }
 /* while a film is out of the strip, the others step back */
 #piste {
@@ -551,8 +581,8 @@ body.film #film {
 }
 #film .ui {
   position: absolute;
-  left: 20px;
-  right: 20px;
+  left: calc(20px + env(safe-area-inset-left));
+  right: calc(20px + env(safe-area-inset-right));
   opacity: 0;
   transition: opacity .5s;
 }
@@ -561,12 +591,17 @@ body.film #film {
 }
 #film.repos .ui {
   opacity: 0;
+  pointer-events: none;
+}
+#film.repos .ui:focus-within {
+  opacity: 1;
+  pointer-events: auto;
 }
 #film.repos {
   cursor: none;
 }
 #film .haut {
-  top: 18px;
+  top: calc(18px + env(safe-area-inset-top));
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -581,7 +616,7 @@ body.film #film {
   border-bottom: 1px solid rgba(12, 12, 12, .3);
 }
 #film .bas {
-  bottom: 22px;
+  bottom: calc(22px + env(safe-area-inset-bottom));
 }
 #film .ligne {
   display: flex;
@@ -744,15 +779,18 @@ body:not([data-vue="bande"]) #titres {
   z-index: 5;
   opacity: 0;
   pointer-events: none;
-  transition: opacity .5s;
+  visibility: hidden;
+  transition: opacity .5s, visibility 0s .5s;
 }
 body[data-vue="apropos"] #apropos,
 body[data-vue="contact"] #contact {
+  visibility: visible;
+  transition-delay: 0s;
   opacity: 1;
 }
 .page .colonne {
   position: absolute;
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   top: 196px;
   width: min(640px, calc(100% - 40px));
   transform: translateY(22px);
@@ -805,10 +843,12 @@ body[data-vue="contact"] .adresses {
   background: linear-gradient(var(--encre), var(--encre)) no-repeat left / 0 100%;
   transition: background-size .5s var(--e), color .3s, padding .5s var(--e);
 }
+@media (hover: hover) and (pointer: fine) {
 .lien:hover {
   background-size: 100% 100%;
   color: var(--papier);
   padding-left: 12px;
+}
 }
 .lien .mono {
   color: var(--gris);
@@ -820,7 +860,7 @@ body[data-vue="contact"] .adresses {
 /* the giant line at the foot of both pages */
 .grand {
   position: absolute;
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   right: 0;
   bottom: .6vw;
 }
@@ -895,8 +935,15 @@ body[data-vue="contact"] .adresses {
 /* ---------- narrow desktop and tablet: the filters move toward the middle */
 @media (max-width: 1000px) {
   .filtres {
-    left: 300px;
+    left: 190px;
+    right: 160px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
   }
+  .filtres::-webkit-scrollbar { display: none; }
+  #cats { flex: none; }
+  #cats button { white-space: nowrap; flex: none; }
   /* no room beside the squares: the word goes under them */
   .menu .btn {
     flex-direction: column;
@@ -904,7 +951,7 @@ body[data-vue="contact"] .adresses {
     gap: 4px;
   }
   .menu .mono {
-    font-size: 8px;
+    font-size: 11px;
   }
   .menu {
     gap: 10px;
@@ -921,7 +968,7 @@ body[data-vue="contact"] .adresses {
     top: 16px;
   }
   .qui {
-    left: 16px;
+    left: calc(16px + env(safe-area-inset-left));
   }
   .qui b {
     font-size: 13px;
@@ -930,12 +977,12 @@ body[data-vue="contact"] .adresses {
     display: none;
   }
   .menu {
-    right: 16px;
+    right: calc(16px + env(safe-area-inset-right));
     top: 12px !important;
     gap: 8px;
   }
   .filtres {
-    left: 16px;
+    left: calc(16px + env(safe-area-inset-left));
     top: 64px;
   }
   #cats {
@@ -947,7 +994,7 @@ body[data-vue="contact"] .adresses {
   }
   .vues {
     left: auto;
-    right: 16px;
+    right: calc(16px + env(safe-area-inset-right));
     top: 64px;
     gap: 14px;
   }
@@ -968,8 +1015,8 @@ body[data-vue="contact"] .adresses {
     height: calc(100% - 216px);
   }
   #lu {
-    left: 16px;
-    right: 16px;
+    left: calc(16px + env(safe-area-inset-left));
+    right: calc(16px + env(safe-area-inset-right));
     top: auto;
     bottom: 100px;
     padding: 0;
@@ -1005,7 +1052,7 @@ body[data-vue="contact"] .adresses {
     left: 16px;
     right: 16px;
     top: 96px;
-    bottom: 16px;
+    bottom: calc(30px + env(safe-area-inset-bottom));
   }
   .rang {
     grid-template-columns: 26px 1fr 40px;
@@ -1018,14 +1065,22 @@ body[data-vue="contact"] .adresses {
   }
   .rang .titre {
     overflow: hidden;
+    flex-wrap: wrap;
+    white-space: normal;
+    row-gap: 2px;
   }
   .rang .g {
     font-size: 18px;
   }
   .rang .i {
     font-size: 20px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    line-height: 1.05;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  @media (max-width: 380px) {
+    .rang .g { font-size: 15px; }
+    .rang .i { font-size: 16px; }
   }
   .page .colonne {
     left: 16px;
@@ -1319,7 +1374,7 @@ body[data-vue="contact"] #contact .colonne {
   content: "";
   position: absolute;
   left: 50%;
-  top: 0;
+  top: clamp(72px, 12vh, 96px);
   bottom: 0;
   width: 1px;
   background: rgba(243, 243, 241, .26);
@@ -1386,13 +1441,16 @@ body[data-vue="contact"] #contact .colonne {
 }
 @media (max-width: 699px) {
   .gl {
-    grid-template-columns: 30% 1fr;
-    column-gap: 20px;
+    grid-template-columns: 1fr;
+    row-gap: 4px;
     padding: 0 16px;
     margin-bottom: 22px;
   }
+  .ga {
+    text-align: left;
+  }
   #generique::before {
-    left: calc(16px + (100% - 52px) * .3 + 10px);
+    display: none;
   }
   .gd {
     font-size: 17px;
@@ -1415,7 +1473,7 @@ body[data-vue="contact"] #contact .colonne {
   }
   #film .haut .btn .mono,
   .tcmd .btn .mono {
-    font-size: 9px;
+    font-size: 11px;
     white-space: nowrap;
   }
 }
@@ -1492,15 +1550,15 @@ body.leger .pose {
 #tTitre .tu {
   display: grid;
   place-items: center;
-  font: 700 calc(var(--ct) * .44) / 1 var(--sans);
+  font: 700 max(10px, calc(var(--ct) * .44)) / 1 var(--sans);
   letter-spacing: -.03em;
 }
 #tTitre .tu.i {
-  font: italic 400 calc(var(--ct) * .58) / 1 var(--serif);
+  font: italic 400 max(10px, calc(var(--ct) * .58)) / 1 var(--serif);
   letter-spacing: 0;
 }
 #tTitre .tu.x {
-  font: 400 calc(var(--ct) * .42) / 1 var(--mono);
+  font: 400 max(10px, calc(var(--ct) * .42)) / 1 var(--mono);
   color: var(--bleu);
 }
 /* the narrow strip between two manuscript rows carries the timecodes */
@@ -1529,7 +1587,7 @@ body.leger .pose {
   position: absolute;
   left: 4px;
   bottom: 6px;
-  font-size: 8.5px;
+  font-size: 10px;
   letter-spacing: .04em;
   white-space: nowrap;
 }
@@ -1572,6 +1630,11 @@ body.leger .pose {
 @media (max-width: 699px) {
   .tcmd {
     gap: 12px;
+  }
+  /* a thumb-sized scrub bar: the tiles of the film row are tall, not square */
+  #tTemps .tu {
+    aspect-ratio: auto;
+    height: 44px;
   }
 }
 
@@ -1883,7 +1946,8 @@ body.temps {
      so smaller tracks mean a bigger picture */
   --haut: 118px;
   --pied: calc(100vh - 132px - var(--np) * var(--hp));
-  --fh: calc(var(--pied) - 44px - var(--haut));
+  --pied: calc(100dvh - 132px - var(--np) * var(--hp));
+  --fh: max(120px, calc(var(--pied) - 44px - var(--haut)));
 }
 /* the big title at the foot belongs to the phone strip only */
 body.temps #titres,
@@ -1902,7 +1966,7 @@ body.temps #regle {
   top: calc(var(--pied) + var(--np) * var(--hp) + 4px);
 }
 body.temps #lu {
-  top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
+  top: calc(var(--pied) + var(--np) * var(--hp) + 64px);
 }
 .tetel {
   display: none;
@@ -1921,11 +1985,12 @@ body.temps .tetel {
 body.temps #fenetre {
   /* as tall as the room allows, unless the film is so wide that it would reach the sides */
   --ratio: 1.7778;
-  --wh: min(var(--fh), calc((100vw - 520px) / var(--ratio)));
+  --wh: min(var(--fh), calc(max(100vw - 520px, min(100vw - 40px, 800px)) / var(--ratio)));
   display: block;
   position: fixed;
   left: 50%;
-  top: calc(var(--pied) - 44px - var(--wh));
+  /* when the width, not the height, limits the picture (tablet portrait), centre it in the room left */
+  top: calc(var(--pied) - 44px - var(--wh) - max(0px, var(--fh) - var(--wh)) / 2);
   height: var(--wh);
   width: calc(var(--wh) * var(--ratio, 1.78));
   transform: translateX(-50%);
@@ -1979,8 +2044,10 @@ body.tire #fenetre {
   filter: grayscale(1);
   transition: opacity .4s, filter .4s, outline-color .3s;
 }
+@media (hover: hover) and (pointer: fine) {
 .clip:hover .cadre {
   opacity: .8;
+}
 }
 .clip.actif .cadre {
   opacity: 1;
@@ -2004,10 +2071,10 @@ body.tire #fenetre {
   color: var(--gris);
   transition: color .35s;
 }
-.clip:hover .etiq,
 .clip.actif .etiq {
   color: var(--encre);
 }
+@media (hover: hover) and (pointer: fine) { .clip:hover .etiq { color: var(--encre); } }
 .etiq b {
   font: 700 13px/1 var(--sans);
   letter-spacing: -.03em;
@@ -2039,8 +2106,10 @@ body.tire #fenetre {
 .nompiste.eteint {
   color: var(--gris);
 }
+@media (hover: hover) and (pointer: fine) {
 .nompiste:hover {
   color: var(--encre);
+}
 }
 /* the picked track is underlined, like the picked filter of the list */
 .nompiste.solo {
@@ -2057,6 +2126,7 @@ body.tire #fenetre {
   body:not([data-vue="liste"]) .filtres {
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
     transition: none;
   }
 }
@@ -2118,7 +2188,7 @@ body.tire #fenetre {
 body.temps .outils {
   display: flex;
   position: fixed;
-  left: 20px;
+  left: calc(20px + env(safe-area-inset-left));
   top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
   flex-direction: column;
   gap: 9px;
@@ -2141,7 +2211,7 @@ body.temps .outils {
   color: var(--encre);
 }
 .outils .aide {
-  font-size: 8.5px;
+  font-size: 10px;
   letter-spacing: .05em;
 }
 .outils input[type="range"] {
@@ -2259,7 +2329,7 @@ body.net #poignee {
 }
 /* a touch screen has no hover: the handle under the tracks is always there to grab */
 @media (hover: none) {
-  body.temps #poignee {
+  body.temps[data-vue="bande"] #poignee {
     opacity: .5;
     height: 20px;
   }
@@ -2283,7 +2353,7 @@ body.net #flottant {
 body.temps #sonAccueil {
   display: flex;
   position: fixed;
-  right: 20px;
+  right: calc(20px + env(safe-area-inset-right));
   top: calc(var(--pied) + var(--np) * var(--hp) + 52px);
   z-index: 3;
   transition: opacity .5s;
@@ -2372,7 +2442,7 @@ body.net .filtres {
 }
 
 /* ---------- intro: his name huge over cycling extracts, enter by button, swipe up or scroll */
-#intro { position: fixed; inset: 0; z-index: 100; background: #000; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 16px calc(24px + env(safe-area-inset-bottom)); transition: transform .9s var(--e), opacity .9s; }
+#intro { position: fixed; inset: 0; z-index: 100; background: #000; color: #fff; display: flex; flex-direction: column; justify-content: flex-end; padding: 0 calc(16px + env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); transition: transform .9s var(--e), opacity .9s; }
 #intro[hidden] { display: none; }
 #intro.sort { transform: translateY(-100%); opacity: .6; }
 #intro video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -2382,7 +2452,7 @@ body.net .filtres {
 #intro h1 .b { font: italic 400 22vw/.9 var(--serif); letter-spacing: -.02em; }
 #intro .role { position: relative; margin: 0 0 28px; color: #bbb; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
 #intro .btn { position: relative; color: #fff; }
-#intro #introSon { position: absolute; top: calc(16px + env(safe-area-inset-top)); right: 16px; }
+#intro #introSon { position: absolute; top: calc(16px + env(safe-area-inset-top)); right: calc(16px + env(safe-area-inset-right)); }
 #intro #introEntrer { align-self: flex-start; }
 #intro .btn .k b { border-color: #fff; }
 body.intro-on { overflow: hidden; }
@@ -2410,8 +2480,8 @@ body.intro-on { overflow: hidden; }
 #intro { justify-content: center; }
 #intro h1 { margin-bottom: 20px; }
 #intro .role { margin-bottom: 0; }
-#intro #introEntrer { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: 16px; }
-@media (max-width: 699px) { #intro #introEntrer { left: auto; right: 16px; } #intro h1 { margin-bottom: 35px; } }
+#intro #introEntrer { position: absolute; bottom: calc(24px + env(safe-area-inset-bottom)); left: calc(16px + env(safe-area-inset-left)); }
+@media (max-width: 699px) { #intro #introEntrer { left: auto; right: calc(16px + env(safe-area-inset-right)); } #intro h1 { margin-bottom: 35px; } }
 @media (min-width: 700px) { #intro #introEntrer { left: 20px; bottom: 28px; } #intro h1 { margin-bottom: 26px; } }
 
 /* ---------- phone held sideways: the text of About and Contact has room again (it was squeezed to nothing between the header and the giant title) */
@@ -2488,12 +2558,12 @@ body.intro-on { overflow: hidden; }
 @media (min-width: 700px) { #intro h1 { margin-bottom: 26px; } #intro { padding-bottom: 92px; } }
 
 /* ---------- no sideways drag: on a phone the page must never pan, nothing may reach past the screen and leave white space */
-html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-action: pan-y; overscroll-behavior: none; }
+html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-action: manipulation; overscroll-behavior: none; }
 .page { overflow: hidden; }
 #intro, #film, #passage { max-width: 100vw; }
 @media (max-width: 699px) {
   /* the name link in the header was a full-width box pushed 16px right: it reached past the screen and let the page pan */
-  .tete > .qui { position: absolute; left: 16px; width: auto; max-width: calc(100% - 200px); }
+  .tete > .qui { position: absolute; left: calc(16px + env(safe-area-inset-left)); width: auto; max-width: calc(100% - 200px); }
 }
 @media (max-width: 360px) { .lien { grid-template-columns: 84px 1fr auto; } .lien .v { font-size: 17px; } }
 
@@ -2516,7 +2586,7 @@ html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-acti
 }
 
 /* ---------- the intro, bare: the extracts, the logo small, one word to enter */
-#intro { flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 0 20px calc(20px + env(safe-area-inset-bottom)); cursor: pointer; }
+#intro { flex-direction: row; align-items: flex-end; justify-content: space-between; padding: 0 calc(20px + env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); cursor: pointer; }
 #intro .barre, #intro .filet, #intro .role, #intro .voile { display: none; }
 #intro .intro-logo { margin: 0; }
 #intro .logo { font-size: clamp(30px, 3.4vw, 46px); }
@@ -2532,7 +2602,7 @@ html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-acti
 #intro .logo .pt { display: none; }
 
 /* sound: the same small word, left of Enter, toggling the extracts' own sound */
-#intro #introSon { position: absolute; top: auto; right: 150px; bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 1; opacity: 1; animation: none; }
+#intro #introSon { position: absolute; top: auto; right: calc(150px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); z-index: 1; opacity: 1; animation: none; }
 #intro #introSon .mono { color: rgba(255, 255, 255, .75); font-size: 11px; letter-spacing: .14em; }
 #intro #introSon:hover .mono, #intro #introSon.actif .mono { color: #fff; }
 
@@ -2545,7 +2615,7 @@ html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-acti
 #intro { flex-direction: column; align-items: center; justify-content: center; }
 #intro .intro-logo { margin: 0; }
 #intro .logo { font-size: min(calc((100vw - 40px) / 6.95), 30vh); }
-#intro #introEntrer { position: absolute; left: auto; right: 20px; bottom: calc(20px + env(safe-area-inset-bottom)); }
+#intro #introEntrer { position: absolute; left: auto; right: calc(20px + env(safe-area-inset-right)); bottom: calc(20px + env(safe-area-inset-bottom)); }
 #intro .cadre, #intro video { background: none; }
 
 /* ---------- 19 Oct (Flavyen): one Contact page, the logo typeface in the header, no clapperboard, credit line */
@@ -2561,12 +2631,12 @@ html, body { position: fixed; inset: 0; width: 100%; max-width: 100%; touch-acti
 #contact .texte .mono { color: var(--gris); }
 #contact .listes { margin-top: 26px; }
 #contact .listes dd { font-size: 15px; }
-#contact .droite { position: absolute; right: 20px; top: 196px; width: min(460px, 36vw); opacity: 0; transition: opacity .5s; }
+#contact .droite { position: absolute; right: calc(20px + env(safe-area-inset-right)); top: 196px; width: min(460px, 36vw); opacity: 0; transition: opacity .5s; }
 body[data-vue="contact"] #contact .droite { opacity: 1; }
 #contact .droite > .mono { color: var(--gris); margin-bottom: 14px; }
 #contact .adresses { margin-top: 0; }
 @media (min-width: 900px) { #contact .lien { grid-template-columns: 90px 1fr auto; } #contact .lien .v { font-size: 19px; } }
-.credit { position: fixed; right: 20px; bottom: 14px; margin: 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; z-index: 5; pointer-events: none; }
+.credit { position: fixed; right: calc(20px + env(safe-area-inset-right)); bottom: 14px; margin: 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; z-index: 5; pointer-events: none; }
 @media (max-width: 899px) {
   #contact { overflow-y: auto; }
   #contact .colonne { position: relative; top: 120px; left: 0; margin: 0 20px; }
@@ -2603,7 +2673,8 @@ body[data-vue="contact"] #contact .droite { opacity: 1; }
 #intro .btn.actif .ico svg, #intro .btn.actif .ico .hp { fill: #000; stroke: #000; }
 #intro .btn.actif .ico .hp { stroke: none; }
 #tTitre .tu { background: rgba(6, 6, 6, .8); }
-.indice { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); z-index: 3; color: var(--gris); letter-spacing: .12em; pointer-events: none; opacity: 0; white-space: nowrap; }
+.indice { position: absolute; left: 50%; bottom: 190px; transform: translateX(-50%); z-index: 3; color: #fff; letter-spacing: .12em; pointer-events: none; opacity: 0; white-space: nowrap; max-width: calc(100vw - 32px); }
+#indiceGen { font-size: 11px; padding: 6px 12px; background: rgba(6, 6, 6, .72); }
 #film.pret .indice { animation: indiceGen 6s ease 1.8s both; }
 #film.info .indice { display: none; }
 @keyframes indiceGen { 0%, 100% { opacity: 0; } 14%, 80% { opacity: 1; } }
@@ -2611,7 +2682,7 @@ body[data-vue="contact"] #contact .droite { opacity: 1; }
 #intro .grille { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
 #intro .intro-logo { position: relative; z-index: 2; }
 .indice { color: #fff; }
-#indiceContact { position: fixed; left: 20px; bottom: 14px; top: auto; transform: none; opacity: 0; transition: opacity .4s; color: var(--gris); animation: none; z-index: 5; }
+#indiceContact { position: fixed; left: calc(20px + env(safe-area-inset-left)); bottom: 14px; top: auto; transform: none; opacity: 0; transition: opacity .4s; color: var(--gris); animation: none; z-index: 5; }
 #indiceContact.visible { opacity: 1; }
 @media (min-width: 700px) {
   #contact .colonne { top: 150px; max-height: calc(100% - 150px - 50px) !important; overflow-y: auto; scrollbar-width: none; }
@@ -2628,10 +2699,31 @@ body[data-vue="contact"] .vues, body[data-vue="contact"] #cats, body[data-vue="c
   #cats button sup { display: none; }
 }
 @media (max-width: 699px) { .vues button span { display: none; } }
-#indiceBande { position: fixed; right: 20px; top: 50%; z-index: 4; margin: 0; color: var(--gris); letter-spacing: .12em; font-size: 11px; pointer-events: none; opacity: 0; transition: opacity .5s; animation: souffle 2.2s ease-in-out infinite; }
+#indiceBande { position: fixed; right: calc(20px + env(safe-area-inset-right)); top: 50%; z-index: 4; margin: 0; color: var(--gris); letter-spacing: .12em; font-size: 11px; pointer-events: none; opacity: 0; transition: opacity .5s; animation: souffle 2.2s ease-in-out infinite; }
 body[data-vue="bande"] #indiceBande:not(.vu) { opacity: 1; }
 @keyframes souffle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
-@media (max-width: 699px) { #indiceBande { right: 16px; top: auto; bottom: 150px; } }
+@media (max-width: 699px) { #indiceBande { right: calc(16px + env(safe-area-inset-right)); top: auto; bottom: 150px; } }
+
+/* a narrow phone turned sideways (short, under 700 wide): compact header, title sized on the height, picture clear of the title and the hint */
+@media (max-width: 699px) and (orientation: landscape) and (max-height: 480px) {
+  html { --pt: min(1vw, 1.2vh); }
+  .qui span:not(.salue) { display: none; }
+  .menu { top: 8px !important; }
+  .filtres { top: 40px; }
+  .vues { top: 58px; }
+  #bande { top: 76px; height: calc(100% - 76px - 96px); }
+  .axe { top: calc(76px + (100% - 172px) / 2); }
+  #regle { top: 76px; height: calc(100% - 172px); }
+  #lu { bottom: calc(4px + var(--pt) * 19); }
+  #titres { height: calc(var(--pt) * 18); bottom: 4px; }
+  #titres .tp { height: calc(var(--pt) * 16.5); }
+  #titres .tl { gap: 3vw; padding: 0 20px calc(var(--pt) * 5.5) 0; }
+  .t { height: calc(var(--pt) * 25); }
+  .t .g { font-size: calc(var(--pt) * 9); }
+  .t .i { font-size: calc(var(--pt) * 10.2); }
+  .t .x { font-size: calc(var(--pt) * 3.4); }
+  #indiceBande { top: 62px; bottom: auto; right: calc(80px + env(safe-area-inset-right)); }
+}
 
 body.temps #indiceBande { display: none; }
 
@@ -2662,7 +2754,7 @@ body[data-vue="contact"] .tete::before { opacity: 1; }
   #contact .droite { position: fixed; top: 200px; right: 20px; }
 }
 .lien { padding-left: 16px !important; padding-right: 16px !important; }
-.lien:hover { padding-left: 16px !important; }
+@media (hover: hover) and (pointer: fine) { .lien:hover { padding-left: 16px !important; } }
 #contact .droite > .mono { padding-left: 16px; }
 
 /* a bright extract behind: the name and the two words go black */
@@ -2674,12 +2766,14 @@ body[data-vue="contact"] .tete::before { opacity: 1; }
 
 /* the credit line, on every page: a link that opens a mail to him */
 .credit { z-index: 30 !important; pointer-events: auto !important; cursor: pointer; transition: color .2s; }
-.credit:hover { color: var(--encre); }
+@media (hover: hover) { .credit:hover { color: var(--encre); } }
 @media (max-width: 699px) {
-  .credit { display: block !important; right: 16px; bottom: 3px; font-size: 8px; letter-spacing: .05em; }
+  .credit { display: block !important; right: calc(16px + env(safe-area-inset-right)); bottom: calc(8px + env(safe-area-inset-bottom)); font-size: 10px; letter-spacing: .05em; }
   #titres { bottom: 16px !important; }
 }
 .btn:focus:not(:focus-visible), button:focus:not(:focus-visible) { outline: none; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+body.film :focus-visible { outline-color: #fff; }
 
 /* the credit line belongs to the Contact page only */
 .credit { display: none !important; }
@@ -2692,17 +2786,17 @@ body[data-vue="contact"] .credit { display: block !important; }
 
 /* contact: the whole page scrolls to its very end, nothing cut at the foot */
 @media (min-width: 900px) { #contact .colonne { margin-bottom: 220px; } }
-#indiceContact { left: 50%; transform: translateX(-50%); bottom: 22px; }
+#indiceContact { left: 50%; transform: translateX(-50%); bottom: calc(22px + env(safe-area-inset-bottom)); }
 
 /* the playhead line: still most of the time, with a brief slight glitch now and then */
 .axe { animation: axeGlitch 5.5s steps(1, end) infinite; }
 @keyframes axeGlitch {
-  0%, 38%, 41%, 70%, 73%, 100% { transform: none; clip-path: none; }
-  38.5% { transform: translateX(2px); clip-path: inset(0 0 55% 0); }
-  39.2% { transform: translateX(-2px); clip-path: inset(40% 0 0 0); }
-  40% { transform: translateX(1px); clip-path: none; }
-  70.5% { transform: translateX(-1px); clip-path: inset(20% 0 30% 0); }
-  71.6% { transform: translateX(2px); clip-path: none; }
+  0%, 38%, 41%, 70%, 73%, 100% { translate: none; clip-path: none; }
+  38.5% { translate: 2px; clip-path: inset(0 0 55% 0); }
+  39.2% { translate: -2px; clip-path: inset(40% 0 0 0); }
+  40% { translate: 1px; clip-path: none; }
+  70.5% { translate: -1px; clip-path: inset(20% 0 30% 0); }
+  71.6% { translate: 2px; clip-path: none; }
 }
 
 /* the name is the canvas now: white on dark pictures, turned black on bright ones */
@@ -2712,8 +2806,10 @@ body[data-vue="contact"] .credit { display: block !important; }
 #intro .verre { position: absolute; inset: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .35s;
   -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-backdrop-filter: blur(18px) saturate(1.5) brightness(1.5); backdrop-filter: blur(18px) saturate(1.5) brightness(1.5);
-  background: linear-gradient(180deg, rgba(255,255,255,.34), rgba(255,255,255,.12)); }
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.34)); }
 #intro .verre.on { opacity: 1; }
+/* bottom scrim so Enter / Sound stay readable over burned-in subtitles and dark footage */
+#intro .cadre::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: calc(110px + env(safe-area-inset-bottom)); background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.55)); pointer-events: none; z-index: 1; }
 #intro canvas.grille.fond { opacity: 0; transition: opacity .35s .1s; }
 /* on a bright extract the glass tints dark instead of light, so the name stays readable without turning black or white */
 #intro.clair .verre { -webkit-backdrop-filter: blur(18px) saturate(1.3) brightness(.62); backdrop-filter: blur(18px) saturate(1.3) brightness(.62);
@@ -2735,7 +2831,7 @@ body[data-vue="contact"] .credit { display: block !important; }
   .credit { display: none !important; }
   .credit-in { display: block; margin: 36px 0 44px; color: var(--gris); font-size: 10px; letter-spacing: .08em; }
   body[data-vue="contact"] #contact { overflow-y: auto; }
-  #contact .colonne { position: relative !important; top: 0 !important; left: 0 !important; margin: 104px 20px 0 !important; width: auto !important; max-height: none !important; overflow: visible !important; }
+  #contact .colonne { position: relative !important; top: 0 !important; left: 0 !important; margin: 104px calc(16px + env(safe-area-inset-right)) 0 calc(16px + env(safe-area-inset-left)) !important; width: auto !important; max-height: none !important; overflow: visible !important; }
   #contact .droite { position: relative !important; top: 0 !important; right: auto !important; width: auto !important; margin: 46px 20px 0 !important; opacity: 1 !important; }
   #contact .droite > .mono { padding-left: 0 !important; }
   #contact .lien { padding-left: 0 !important; padding-right: 0 !important; }
@@ -2748,7 +2844,7 @@ body[data-vue="contact"] .credit { display: block !important; }
 /* the credit line belongs to the end of the Contact page: it sits under the last row with its own margin, never floating over it */
 .credit, body[data-vue="contact"] .credit { display: none !important; }
 .credit-in { display: block !important; margin: 34px 0 0; color: var(--gris); font-size: 10px; letter-spacing: .08em; }
-@media (min-width: 900px) { #contact .droite { max-height: calc(100vh - 190px - 24px); overflow-y: auto; padding-bottom: 24px; scrollbar-width: none; } #contact .droite::-webkit-scrollbar { display: none; } }
+@media (min-width: 900px) { #contact .droite { max-height: calc(100vh - 190px - 24px); max-height: calc(100dvh - 190px - 24px); overflow-y: auto; padding-bottom: 24px; scrollbar-width: none; } #contact .droite::-webkit-scrollbar { display: none; } }
 @media (max-width: 899px) { #contact .colonne { margin-top: 72px !important; } .credit-in { margin: 36px 0 48px; } }
 /* the plain logo is never shown in the intro (only measured): the frosted-glass name is the only version */
 #intro .intro-logo { opacity: 0 !important; }
@@ -2759,7 +2855,7 @@ body[data-vue="contact"] #contact { top: 0 !important; bottom: 0 !important; -we
 #contact { -webkit-mask-image: none !important; mask-image: none !important; }
 body[data-vue="contact"] .tete::before { opacity: 1 !important; height: 150px; background: linear-gradient(var(--papier) 0, var(--papier) 62%, rgba(255,255,255,0) 100%); }
 @media (max-width: 899px) { body[data-vue="contact"] .tete::before { height: 84px; background: linear-gradient(var(--papier) 0, var(--papier) 70%, rgba(255,255,255,0) 100%); } }
-@media (min-width: 900px) { #contact .colonne { margin-top: 170px; } #contact .droite { top: 170px; max-height: calc(100vh - 170px - 24px); } }
+@media (min-width: 900px) { #contact .colonne { margin-top: 170px; } #contact .droite { top: 170px; max-height: calc(100vh - 170px - 24px); max-height: calc(100dvh - 170px - 24px); } }
 
 /* Contact: nothing is cropped. The name block scrolls away with the page; only the two menu buttons stay, each on its own small solid chip. */
 body[data-vue="contact"] .tete::before { opacity: 0 !important; }
@@ -2809,11 +2905,14 @@ body[data-vue="contact"] #contact {
 @media (max-width: 899px) {
   body[data-vue="contact"] .menu { transform: translateY(calc(-1 * var(--dy, 0px))); background: none; padding: 0; margin: 0; }
   body[data-vue="contact"] #contact { padding-top: 112px !important; }
+  @media (min-width: 700px) { body[data-vue="contact"] #contact { padding-top: 150px !important; } }
   #contact .chapeau { font-size: clamp(22px, 6vw, 28px) !important; line-height: 1.12; }
   #contact .texte { font-size: 14.5px; line-height: 1.42; }
   #contact .listes dd { font-size: 15px; }
   #contact .lien .v { font-size: 17px; }
   #contact .lien { grid-template-columns: 78px 1fr auto; padding-top: 16px; padding-bottom: 16px; }
+  /* contacts first on phones: the email is on screen at once, the bio follows */
+  #contact .droite { order: -1; }
 }
 /* Clients: set like the two lists above it, a label over a fine rule, the names on tidy lines */
 #contact .clients { margin-top: 0; }
@@ -2829,8 +2928,10 @@ body[data-vue="contact"] #contact, body[data-vue="contact"] #contact .colonne, b
 
 /* hovered contact row: the black fill keeps real room around the text (the label no longer touches the edge of the black) */
 #contact .lien { transition: background-size .5s var(--e), color .3s, padding .4s var(--e); }
+@media (hover: hover) and (pointer: fine) {
 #contact .lien:hover { padding-left: 16px !important; padding-right: 16px !important; }
 #contact .lien:hover .mono { color: rgba(255, 255, 255, .6); }
+}
 
 /* Contact fits on one screen: Clients sits in the right column under the contacts, tighter vertical rhythm on a wide window */
 #contact .droite .clients { margin-top: 30px; }
@@ -2843,4 +2944,113 @@ body[data-vue="contact"] #contact, body[data-vue="contact"] #contact .colonne, b
   #contact .listes dd { line-height: 1.45; font-size: 16px; }
   #contact .lien { padding-top: 15px !important; padding-bottom: 16px !important; }
   #contact .droite .clients .noms { font-size: 15.5px; line-height: 1.5; }
+}
+
+/* 20 Oct: Clients as one flowing line of names, big, no table lines (one rule under the label only) */
+#contact .clients .noms { display: block !important; font-size: clamp(19px, 1.5vw, 26px) !important; line-height: 1.5 !important; letter-spacing: -.01em; }
+#contact .clients .noms b { font-weight: 500; font-size: inherit; padding: 0; border: 0; white-space: nowrap; }
+#contact .clients .noms b::after { content: "\00a0· "; color: var(--gris); white-space: normal; }
+#contact .clients .noms .autres { font: inherit; font-size: inherit; letter-spacing: inherit; text-transform: none; color: var(--gris); padding: 0; border: 0; }
+@media (min-width: 900px) and (min-height: 820px) {
+  body[data-vue="contact"] #contact { padding-top: clamp(140px, 17vh, 220px) !important; }
+  #contact .chapeau { margin-bottom: clamp(20px, 3vh, 36px) !important; }
+  #contact .texte { font-size: clamp(15.5px, 1.9vh, 19px); line-height: 1.5; }
+  #contact .listes { margin-top: clamp(30px, 6vh, 70px) !important; }
+  #contact .listes dd { font-size: clamp(16px, 2vh, 19px); line-height: 1.6; }
+  #contact .lien { padding-top: clamp(15px, 2.1vh, 26px) !important; padding-bottom: clamp(16px, 2.2vh, 27px) !important; }
+  #contact .droite .clients { margin-top: clamp(30px, 6vh, 64px); }
+}
+
+/* 20 Oct: on a phone the credit line stays pinned at the foot of Contact, on a white floor, the page ends clear of it */
+@media (max-width: 899px) {
+  .credit-in { display: none !important; }
+  body[data-vue="contact"] .credit { display: block !important; position: fixed; left: 0; right: 0; bottom: 0; margin: 0; padding: 12px calc(20px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left)); font-size: 10px; letter-spacing: .08em; text-align: left; background: var(--fond, #fff); }
+  body[data-vue="contact"] #contact { padding-bottom: calc(64px + env(safe-area-inset-bottom)) !important; }
+  #indiceContact { bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 31; }
+  body[data-vue="contact"] .credit::before { content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 22px; background: linear-gradient(transparent, var(--fond, #fff)); pointer-events: none; }
+}
+
+/* 20 Oct: Clients has no rule at all, only its label */
+#contact .clients .mono { border-bottom: 0 !important; padding-bottom: 0 !important; margin-bottom: 12px; }
+
+/* 20 Oct: phone, the filters and the view switch never touch. The filters stop short of the switch (room scales with the screen),
+   the words shrink with the width, and on the narrowest phones the row slides sideways under a soft edge */
+@media (max-width: 830px) {
+  .filtres { left: calc(16px + env(safe-area-inset-left)); top: 72px; right: 90px; padding-block: 14px; margin-block: -14px; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 18px), transparent); }
+  .filtres::-webkit-scrollbar { display: none; }
+  #cats { gap: clamp(10px, 3.2vw, 16px); flex: none; }
+  #cats button { font-size: clamp(11px, 3.1vw, 13px); white-space: nowrap; flex: none; padding-right: 0; }
+}
+/* 700-830 (tablet portrait, landscape phones): the logo's role + greeting lines are shown, so the row drops under them, above the view switch */
+@media (min-width: 700px) and (max-width: 830px) {
+  .filtres { top: 128px; }
+}
+
+/* 20 Oct: the credit line is plain grey text, only the name Raouf Hamouda is a link (to mail); the main page carries "tous droits réservés" alone */
+.credit, .credit-in { pointer-events: none !important; cursor: default !important; }
+.credit a, .credit-in a { pointer-events: auto; cursor: pointer; color: inherit; text-decoration: none; transition: color .2s; }
+@media (hover: hover) { .credit a:hover, .credit-in a:hover { color: var(--encre); } }
+.droits { display: none; position: fixed; right: calc(20px + env(safe-area-inset-right)); bottom: calc(14px + env(safe-area-inset-bottom)); margin: 0; z-index: 2; color: var(--gris); font-size: 10px; letter-spacing: .08em; pointer-events: none; }
+body[data-vue="bande"] .droits, body[data-vue="liste"] .droits { display: block; }
+body.intro-on .droits { display: none; }
+@media (max-width: 699px) { .droits { right: calc(16px + env(safe-area-inset-right)); bottom: calc(8px + env(safe-area-inset-bottom)); font-size: 10px; letter-spacing: .05em; } }
+
+/* 20 Oct: the name never splits across lines; the line breaks before it */
+.credit a, .credit-in a { white-space: nowrap; }
+
+/* reduced motion: the logo, the axis glitch and the hint breathing stand still */
+@media (prefers-reduced-motion: reduce) {
+  .logo.joue .c span, .logo.joue .fl svg, .logo.joue .pt, .logo.joue .pt::before { animation: none !important; transform: none; opacity: 1; }
+  .axe, #indiceBande, #indiceContact { animation: none !important; }
+}
+
+/* 20 Oct: Korean breaks between words, never inside one */
+html[lang=ko] { word-break: keep-all; overflow-wrap: break-word; }
+html[lang=ko] h1, html[lang=ko] h2 { text-wrap: balance; }
+html[lang=ko] #contact .chapeau, html[lang=ko] #contact .texte { overflow-wrap: break-word; }
+
+/* 20 Oct: narrow phones, the address gets the full width, the Copy label drops under it */
+@media (max-width: 380px) {
+  #contact #courriel { grid-template-columns: 56px 1fr; }
+  #contact #courriel .v { font-size: 14px; overflow-wrap: break-word; }
+  #contact #courriel .f { grid-column: 2; justify-self: start; }
+}
+/* the contact values (email, links, hours, clients) can be selected and copied */
+#contact .droite, #contact .colonne { user-select: text; -webkit-user-select: text; }
+
+/* 20 Oct: every small control gets a real hit area without moving its look: 24px on a mouse, 44px on touch */
+#langues button, .menu .btn, .outils button, #retour, #qualite, #son, #info, #prec, #suiv, #pause { position: relative; }
+#langues button::after, .menu .btn::after, .outils button::after, #retour::after, #qualite::after, #son::after, #info::after, #prec::after, #suiv::after, #pause::after,
+.vues button::after, #introSon::after, #introEntrer::after { content: ""; position: absolute; inset: -6px -4px; }
+.outils input[type="range"] { height: 24px; }
+@media (pointer: coarse) {
+  #langues button::after, .menu .btn::after, .outils button::after, #retour::after, #qualite::after, #son::after, #info::after, #prec::after, #suiv::after, #pause::after,
+  .vues button::after, #introSon::after, #introEntrer::after { inset: -14px -8px; }
+  .outils input[type="range"] { height: 44px; }
+}
+
+/* player.js late or blocked: no dead Sound/Pause/Quality buttons, the credits panel keeps its Vimeo link */
+#film.sansapi #son, #film.sansapi #pause, #film.sansapi #qualite { display: none; }
+
+/* 20 Oct: real boxes (not only ::after) for the contact language buttons, list rows and credit link on touch */
+@media (pointer: coarse) {
+  #langues button { min-width: 44px; min-height: 44px; }
+  .rang { min-height: 44px; align-content: center; }
+  .credit a, .credit-in a { display: inline-block; padding: 14px 0; margin: -14px 0; }
+}
+
+/* while the intro plays, the site behind it is out of reach of Tab and Enter */
+body.intro-on .tete,
+body.intro-on #bande,
+body.intro-on #liste,
+body.intro-on .filtres { visibility: hidden; }
+
+/* 20 Oct (C57): very large screens, contact content and small mono labels scale up instead of floating tiny */
+@media (min-width: 1900px) {
+  #contact .colonne, #contact .droite { zoom: 1.3; }
+  .mono { font-size: max(1em, 12px); }
+}
+@media (min-width: 2400px) {
+  #contact .colonne, #contact .droite { zoom: 1.6; }
 }

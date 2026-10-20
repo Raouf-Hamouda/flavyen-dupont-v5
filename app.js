@@ -9,6 +9,8 @@
     if (txt != null) e.textContent = txt;
     return e;
   };
+  // a div/a that acts on click is a button for the keyboard and screen readers (Enter/Space click it, see keydown)
+  const bouton = (e, nom) => { e.tabIndex = 0; e.setAttribute('role', 'button'); e.setAttribute('aria-label', nom); return e; };
   const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
   const damp = (k, dt) => 1 - Math.exp(-k * dt);
   const pad = n => String(n).padStart(2, '0');
@@ -21,7 +23,8 @@
   const tactile = matchMedia('(hover: none)').matches;
   // French for a French browser, English for everyone else
   const EN = !/^fr\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || 'fr');
-  const T = (fr, en) => EN ? en : fr;
+  // the texts built by the script follow the language the visitor picked (langue, below), Korean falling back to English
+  const T = (fr, en, ko) => langue === 'fr' ? fr : langue === 'ko' ? (ko || en) : en;
   // Korean for a Korean browser (only where a data-ko text exists), English otherwise
   const KO = /^ko\b/i.test((navigator.languages && navigator.languages[0]) || navigator.language || '');
   for (const e of document.querySelectorAll('[data-en]')) e.dataset.fr = e.innerHTML;   // the French text, kept before any swap
@@ -41,22 +44,29 @@
     }
     for (const b of document.querySelectorAll('#langues button')) b.classList.toggle('actif', b.dataset.l === l);
     try { localStorage.setItem('lang', l); } catch (e) {}
+    if (typeof relangue === 'function') relangue();
   }
   const vue = () => document.body.dataset.vue;
+  // browser history: every view and every film is a hash (#bande #liste #apropos #contact #film/slug), so Back and Forward stay on the site
+  const hashDepart = location.hash;
+  let sansHistoire = false, parHistoire = false;
+  const empiler = (etat, h) => { try { history.state ? history.pushState(etat, '', h) : history.replaceState(etat, '', h); } catch (e) {} };
 
   // ---------------------------------------------------------------- content: his 25 projects, from donnees.js
-  const CATS = { pub: 'Commercials', fiction: 'Narrative', autre: 'Motion & Edit Lab' };
+  const CATS = { pub: { fr: 'Commercials', en: 'Commercials', ko: '광고' }, fiction: { fr: 'Narrative', en: 'Narrative', ko: '내러티브' }, autre: { fr: 'Motion & Edit Lab', en: 'Motion & Edit Lab', ko: '모션 & 에디트 랩' } };
+  const catNom = c => CATS[c] ? CATS[c][langue] : '';
   // release order, newest first: the Vimeo upload number grows with the date, so it stands in for the year he has not given yet
   const FILMS = window.FILMS.sort((a, b) => (+b.vimeo || 0) - (+a.vimeo || 0));
   const sobre = !!(navigator.connection && navigator.connection.saveData);
   // the sharp file everywhere (a phone screen is 2x or 3x); the light one only when data saving is asked for
-  const boucle = f => `affiches/${FILMS[f].slug}${sobre ? EXT : '-hd.mp4'}`;
+  const boucle = f => `affiches/${FILMS[f].slug}${sobre || /^(slow-2g|2g|3g)$/.test((navigator.connection || {}).effectiveType) ? EXT : '-hd.mp4'}`;
   // the loops of the films next in the edit are fetched ahead, so the window never waits on the swap
   const prefetches = new Set();
   function precharger(f) {
     const n = visibles.indexOf(f), m = visibles.length;
-    if (m < 2) return;
-    for (const g of [visibles[(n + 1) % m], visibles[(n - 1 + m) % m]]) {
+    const c = navigator.connection;
+    if (m < 2 || (c && (c.saveData || c.type === 'cellular' || (c.effectiveType && c.effectiveType !== '4g')))) return;
+    for (const g of [visibles[(n + 1) % m]]) {
       const u = boucle(g);
       if (prefetches.has(u)) continue;
       prefetches.add(u);
@@ -65,7 +75,7 @@
   }
   const nette = f => FILMS[f].hd ? `affiches/${FILMS[f].slug}-hd.jpg` : affiche(f);
   const affiche = f => `affiches/${FILMS[f].slug}${FILMS[f].hd ? '-m' : ''}.jpg`;
-  const etiquette = d => [CATS[d.cat], d.an].filter(Boolean).join(' · ');
+  const etiquette = d => [catNom(d.cat), d.an].filter(Boolean).join(' · ');
 
   // light mode: asked for by the system (reduced motion), or switched on when frames come too slowly
   let leger = matchMedia('(prefers-reduced-motion: reduce)').matches, lent = 0;
@@ -107,7 +117,7 @@
     survol = null;
     piste.classList.remove('survol');
     const vw = innerWidth, n = visibles.length;
-    if (vertical) { L = bandeEl.clientHeight; W = vw < 700 ? vw - 32 : clamp(Math.min(vw * .44, (L - 40) * .62 * 1.5), 360, 900); S = W / 1.5; X0 = vw < 700 ? 16 : (vw - W) / 2; }
+    if (vertical) { L = bandeEl.clientHeight; W = vw < 700 ? Math.min(vw - 32, Math.max(150, (L - 40) * .62 * 1.5)) : clamp(Math.min(vw * .44, (L - 40) * .62 * 1.5), 360, 900); S = W / 1.5; X0 = vw < 700 ? (vw - W) / 2 : (vw - W) / 2; }
     else { W = clamp(vw * .156, 150, 290); S = W; L = vw; }
     PAS = S + (vertical ? 8 : 10);
     document.documentElement.style.setProperty('--w', W + 'px');
@@ -115,7 +125,7 @@
     const jeux = Math.ceil((L + PAS * 5) / (n * PAS));
     for (let j = 0; j < jeux * n; j++) {
       const f = visibles[j % n];
-      const a = el('a', 'vignette' + (FILMS[f].nb ? ' nb' : ''));
+      const a = bouton(el('a', 'vignette' + (FILMS[f].nb ? ' nb' : '')), FILMS[f].g);
       const cadre = a.appendChild(el('div', 'cadre'));
       const im = cadre.appendChild(new Image());
       im.decoding = 'async';
@@ -164,6 +174,7 @@
   addEventListener('wheel', function (e) {
     // the list and the credits panel scroll by themselves; only the strip takes the wheel over
     if (ouvert || vue() !== 'bande') return;
+    if (vertical && (e.ctrlKey || e.metaKey)) return;   // browser zoom passes through on the vertical strip
     e.preventDefault();
     const dy = e.deltaMode === 1 ? e.deltaY * 32 : e.deltaY;
     if (!vertical && (e.ctrlKey || e.metaKey)) return viserZoom(zc * Math.exp(-clamp(dy, -50, 50) * .006));
@@ -213,7 +224,7 @@
     if (!glisse.on) return;
     glisse.on = false;
     bandeEl.classList.remove('prise');
-    pousser(glisse.v * 320);
+    pousser(performance.now() - glisse.t > 80 ? 0 : glisse.v * 320);   // held still before release = no fling
   };
   addEventListener('pointerup', lacher);
   addEventListener('pointercancel', lacher);
@@ -225,7 +236,7 @@
       if (vertical) {
         // on a phone the strip comes to rest with one film on the line
         if (now - dernierGeste > 240) cible += (Math.round((cible + decale) / PAS) * PAS - decale - cible) * damp(6, dt);
-      } else if (!survol && now - dernierGeste > 2600) {
+      } else if (!leger && !survol && now - dernierGeste > 2600) {
         // on a wide screen, left alone, it keeps turning slowly
         cible += 16 * dt;
       }
@@ -251,7 +262,7 @@
       it.vis = p > -S && p < L;
       // a picture well outside the screen is switched off and costs nothing
       const loin = p < -S * 1.7 || p > L + S * .7;
-      if (loin !== it.loin) { it.loin = loin; it.cadre.style.visibility = loin ? 'hidden' : ''; }
+      if (loin !== it.loin) { it.loin = loin; it.el.style.visibility = loin ? 'hidden' : ''; }
       if (loin) continue;
       if (!it.charge) { it.charge = true; it.im.src = affiche(it.f); }
       // light mode (slow device, or reduced motion asked for): the pictures only slide
@@ -290,10 +301,12 @@
   // plays the film itself, from Vimeo, once the playhead rests on it: the film fades in over its preview, the
   // window takes the film's true shape, and the playhead reads the film's real timecode. Moving on cuts it.
   const sonB = $('#sonAccueil');
-  let sonOn = false, vw = null, vwF = -1, vwVoulu = -1, vwT = 0, vwTemps = 0, vwSeek = 0, vwTaux = 1;
+  let sonOn = false, vw = null, vwF = -1, vwVoulu = -1, vwT = 0, vwS = 0, vwTemps = 0, vwSeek = 0, vwTaux = 1;
   // the Vimeo players are prepared ahead (paused, loaded) for the film under the playhead and its neighbours, so that
   // when the playhead rests the film starts at once instead of waiting for a player to load
   const pool = new Map();
+  // destroy() unregisters the player's listeners and removes its iframe
+  const tuer = (p, fr) => { try { p.destroy().catch(function () {}); } catch (x) { fr.remove(); } };
   function pret(f, direct, depart) {
     let e = pool.get(f);
     if (e) return e;
@@ -302,6 +315,7 @@
     const fr = el('iframe');
     fr.src = `https://player.vimeo.com/video/${d.vimeo}?autoplay=${direct ? 1 : 0}&muted=0&loop=1&controls=0&title=0&byline=0&portrait=0&dnt=1&playsinline=1${direct ? '#t=' + (depart || 0) + 's' : ''}`;
     fr.allow = 'autoplay; fullscreen';
+    fr.tabIndex = -1; fr.setAttribute('aria-hidden', 'true');
     fenetre.appendChild(fr);
     const p = new window.Vimeo.Player(fr);
     e = { f, fr, p, pret: false };
@@ -317,21 +331,22 @@
     });
     pool.set(f, e);
     for (const [k, o] of pool) {
-      if (pool.size <= 5) break;
-      if (k !== vwF && k !== f) { o.fr.remove(); pool.delete(k); }
+      if (pool.size <= 3) break;
+      if (k !== vwF && k !== f) { tuer(o.p, o.fr); pool.delete(k); }
     }
     return e;
   }
   function preparer(f) {
-    // prepared even before the Sound button is pressed: a click then starts the film at once
-    if (f < 0 || document.body.classList.contains('intro-on')) return;
-    // the film under the playhead and the next two on the edit
+    // prepared only once the Sound is on (no idle Vimeo traffic); the first click then lands on ready players
+    if (f < 0 || !sonOn || document.body.classList.contains('intro-on')) return;
+    // the film under the playhead and the next one on the edit
     const i = items.findIndex(it => it.f === f);
     pret(f);
-    if (i >= 0) { pret(items[(i + 1) % items.length].f); pret(items[(i + 2) % items.length].f); }
+    if (i >= 0) { pret(items[(i + 1) % items.length].f); }
   }
   function couperVimeo() {
     clearTimeout(vwT);
+    clearTimeout(vwS);
     if (vw) { vw.pause().catch(function () {}); }
     $$('iframe.courant', fenetre).forEach(function (fr) { fr.classList.remove('courant'); });
     vw = null;
@@ -342,6 +357,7 @@
   function lancerVimeo(f) {
     const d = FILMS[f];
     if (!sonOn || !d.vimeo || !window.Vimeo) return;
+    clearTimeout(vwS);
     const e = pret(f);
     if (!e) return;
     vwF = f;
@@ -360,9 +376,9 @@
     };
     e.pret ? go() : e.p.ready().then(go).catch(function () {});
     // safety net: if the prepared player has not started the film soon, load a fresh one that starts by itself (the way it always worked)
-    setTimeout(function () {
-      if (vwF !== f || fenetre.classList.contains('son') || !sonOn) return;
-      e.fr.remove(); pool.delete(f);
+    vwS = setTimeout(function () {
+      if (vwF !== f || pool.get(f) !== e || fenetre.classList.contains('son') || !sonOn) return;
+      tuer(e.p, e.fr); pool.delete(f);
       const n = pret(f, true, depart);
       if (!n) return;
       n.fr.classList.add('courant'); vw = n.p; n.p.setVolume(1).catch(function () {});
@@ -379,16 +395,20 @@
     sonOn = on;
     sonB.classList.toggle('actif', on);
     if (on) setTimeout(function () { preparer(sousF); }, 0);
-    $('.mono', sonB).textContent = on ? T('Son', 'Sound') : T('Son coupé', 'Sound off');
+    etiquetteSon();
   }
+  function etiquetteSon() { $('.mono', sonB).textContent = sonOn ? T('Son', 'Sound', '소리') : T('Son coupé', 'Sound off', '소리 끔'); }
   reglerSon(false);
   sonB.addEventListener('click', () => reglerSon(!sonOn));
 
   // the reminder under the sliders names the keys of this machine, or the gestures of a touch screen
   const MAC = /Mac|iPhone|iPad|iPod/i.test(navigator.platform || navigator.userAgent);
-  $('#aide').textContent = tactile
-    ? T('Glissez pour parcourir · pincez pour zoomer', 'Drag to browse · pinch to zoom')
-    : `${MAC ? '⌘' : 'Ctrl'} + ${T('molette', 'wheel')} zoom · ${MAC ? '⌥' : 'Alt'} + ${T('molette hauteur', 'wheel height')} · J K L ${T('lecture', 'play')}`;
+  function ecrireAide() {
+    $('#aide').textContent = tactile
+      ? T('Glissez pour parcourir · pincez pour zoomer', 'Drag to browse · pinch to zoom', '드래그해서 둘러보기 · 핀치로 확대')
+      : `${MAC ? '⌘' : 'Ctrl'} + ${T('molette', 'wheel', '휠')} zoom · ${MAC ? '⌥' : 'Alt'} + ${T('molette hauteur', 'wheel height', '휠 높이')} · J K L ${T('lecture', 'play', '재생')}`;
+  }
+  ecrireAide();
   // the controls of the edit: zoom and track height, as two sliders, and the handle under the tracks
   $('#zoomR').addEventListener('input', function () { viserZoom(Math.exp(+this.value)); });
   $('#hautR').addEventListener('input', function () { regleHauteur(+this.value); });
@@ -430,7 +450,8 @@
     // the track headers work like the filters of the list: a click keeps only that track (the others go grey
     // and can be picked in turn), a second click on it brings them all back
     pistes.forEach(function (c, k) {
-      const nom = piste.appendChild(el('button', 'nompiste mono' + (filtre === c ? ' solo' : filtre === 'tout' ? '' : ' eteint'), `V${k + 1} ${CATS[c] || T('Autre', 'Other')}`));
+      const nom = piste.appendChild(el('button', 'nompiste mono' + (filtre === c ? ' solo' : filtre === 'tout' ? '' : ' eteint'), `V${k + 1} ${catNom(c) || T('Autre', 'Other', '기타')}`));
+      nom.dataset.c = c; nom.dataset.k = k;
       nom.style.top = `calc(${k} * var(--hp))`;
       nom.addEventListener('pointerdown', e => e.stopPropagation());
       nom.addEventListener('click', () => filtrer(filtre === c ? 'tout' : c));
@@ -446,7 +467,7 @@
     const jeux = Math.max(1, Math.ceil((innerWidth + MARGE * 2) / (t * ZMIN)));
     for (let j = 0; j < jeux; j++) {
       for (const s of seq) {
-        const d = FILMS[s.f], a = el('a', 'clip' + (d.nb ? ' nb' : ''));
+        const d = FILMS[s.f], a = bouton(el('a', 'clip' + (d.nb ? ' nb' : '')), d.g);
         a.style.width = s.w * z - 3 + 'px';
         a.style.top = `calc(${s.y} * var(--hp))`;
         const cadre = a.appendChild(el('div', 'cadre'));
@@ -460,6 +481,8 @@
         // a clip under the playhead opens; any other clip is first brought under the playhead
         a.addEventListener('click', function () {
           if (glisse.bouge > 6) return;
+          // on touch the finger already chose this clip: open it at once, from its own tile
+          if (tactile) return ouvrir(it.f, a.getBoundingClientRect(), a);
           if (sous === it) return ouvrir(it.f, fenetre.getBoundingClientRect(), fenetre);
           cible += ((it.x + it.w / 2 - pos) % span + span * 1.5) % span - span / 2;
           dernierGeste = performance.now();
@@ -492,8 +515,8 @@
     const max = Math.max(52, (innerHeight - 440) / Math.max(1, nPistes));
     hp = clamp(h, 52, max);
     document.body.style.setProperty('--hp', hp.toFixed(1) + 'px');
-    $('#hautR').value = hp;
     $('#hautR').max = Math.round(max);
+    $('#hautR').value = hp;
   }
   function viserZoom(nz) {
     zc = clamp(nz, ZMIN, ZMAX);
@@ -517,7 +540,10 @@
     arret = !navette;
     dernierGeste = performance.now();
   }
-  fenetre.addEventListener('click', function () {
+  let fenDown = null;   // a drag that starts in the preview must not open the film on release
+  fenetre.addEventListener('pointerdown', e => { fenDown = [e.clientX, e.clientY]; });
+  fenetre.addEventListener('click', function (e) {
+    if (fenDown && Math.hypot(e.clientX - fenDown[0], e.clientY - fenDown[1]) > 6) return;
     if (sous && glisse.bouge <= 6) ouvrir(sous.f, fenetre.getBoundingClientRect(), fenetre);
   });
   // the window shows the preview of the film whole. Every preview is a 16:9 file, whatever the shape of the
@@ -551,7 +577,7 @@ void main(){
     gld.uniform1i(U('A'), 0); gld.uniform1i(U('B'), 1);
     depEtat.prog = function (ia, ib, duree) {
       const run = ++depEtat.run, r = fenetre.getBoundingClientRect();
-      if (!r.width) return;
+      if (!r.width) { dep.classList.remove('on'); return; }
       dep.width = Math.round(r.width); dep.height = Math.round(r.height); gld.viewport(0, 0, dep.width, dep.height);
       [ia, ib].forEach(function (im, k) { gld.activeTexture(gld.TEXTURE0 + k); gld.bindTexture(gld.TEXTURE_2D, tx[k]); gld.texImage2D(gld.TEXTURE_2D, 0, gld.RGBA, gld.RGBA, gld.UNSIGNED_BYTE, im); });
       gld.uniform1f(U('aA'), ia.naturalWidth / ia.naturalHeight); gld.uniform1f(U('aB'), ib.naturalWidth / ib.naturalHeight); gld.uniform1f(U('box'), dep.width / dep.height);
@@ -601,7 +627,7 @@ void main(){
     if (navette && !glisse.on && !ouvert) cible += navette * 60 * z * dt;
     // left alone the edit plays on by itself; with the sound on it moves at the speed of the film's own time, so the
     // playhead and the sound stay together and the next film comes when this one ends
-    else if (!arret && !glisse.on && !ouvert && now - dernierGeste > (sonOn ? 500 : 2600) && vue() === 'bande') cible += (sonOn && sous && FILMS[sous.f].duree ? sous.w / FILMS[sous.f].duree : 40) * dt;
+    else if (!arret && !glisse.on && !ouvert && !matchMedia('(prefers-reduced-motion: reduce)').matches && now - dernierGeste > (sonOn ? 500 : 2600) && vue() === 'bande') cible += (sonOn && sous && FILMS[sous.f].duree ? sous.w / FILMS[sous.f].duree : 40) * dt;
     const avant = pos;
     pos += (cible - pos) * damp(6, dt);
     if (Math.abs(cible - pos) < .02) pos = cible;
@@ -797,7 +823,7 @@ void main(){
   function construireFiltres() {
     const cats = $('#cats');
     cats.innerHTML = '';
-    for (const [id, nom] of [['tout', T('Tout', 'All')], ...Object.entries(CATS)]) {
+    for (const [id, nom] of [['tout', T('Tout', 'All', '전체')], ...Object.keys(CATS).map(c => [c, catNom(c)])]) {
       const b = el('button', id === filtre ? 'actif' : '');
       const combien = id === 'tout' ? FILMS.length : FILMS.filter(f => f.cat === id).length;
       b.append(el('span', '', nom), el('sup', 'mono', pad(combien)));
@@ -822,11 +848,11 @@ void main(){
     construireListe();
   }
   function voir(v) {
+    if (!sansHistoire && !(history.state && history.state.v === v && !history.state.film)) empiler({ v }, '#' + v);
     document.body.dataset.vue = v;
-    $$('.vues button').forEach(b => b.classList.toggle('actif', b.dataset.vue === v));
-    $$('.menu .btn').forEach(b => b.classList.toggle('actif', b.dataset.vue === v || (b.dataset.vue === 'bande' && v === 'liste')));
+    $$('.vues button').forEach(b => { b.classList.toggle('actif', b.dataset.vue === v); b.setAttribute('aria-pressed', b.dataset.vue === v); });
+    $$('.menu .btn').forEach(b => { const a = b.dataset.vue === v || (b.dataset.vue === 'bande' && v === 'liste'); b.classList.toggle('actif', a); if (a) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
     flottant.classList.remove('on');
-    trainee.innerHTML = '';
     if (window.logoFD) window.logoFD.jouer($('#' + v));
     if (v !== 'bande') quitter(survol);
     luF = -1;
@@ -834,6 +860,7 @@ void main(){
   $$('.vues button, .menu .btn').forEach(function (b) {
     b.onclick = function () {
       const de = vue(), a = b.dataset.vue;
+      if (enPassage) { if (a !== 'bande' && a !== 'liste') voir(a); return; } // a view chosen mid-passage wins (finir() skips its own voir)
       if ((de === 'bande' && a === 'liste') || (de === 'liste' && a === 'bande')) passer(a);
       else voir(a);
     };
@@ -1005,7 +1032,8 @@ void main(){
     setTimeout(() => finir(vers, anims), DUREE_P);
   }
   function finir(vers, anims) {
-    voir(vers);
+    // the target is only entered if nothing else moved the view during the passage
+    if (!vers || vue() === (vers === 'liste' ? 'bande' : 'liste')) voir(vers);
     anims.forEach(a => a.cancel());
     passage.innerHTML = '';
     roulePenche = '';
@@ -1020,7 +1048,8 @@ void main(){
       dernierGeste = performance.now();
     }));
   }
-  $('#accueil').onclick = () => voir('bande');
+  bouton($('#accueil'), 'Flavyen Dupont, accueil');
+  $('#accueil').onclick = () => { voir('bande'); };
 
   // ---------------------------------------------------------------- list
   const liste = $('#liste'), flottant = $('#flottant');
@@ -1030,13 +1059,15 @@ void main(){
   function construireListe() {
     liste.innerHTML = '';
     visibles.forEach(function (f, n) {
-      const d = FILMS[f], r = el('a', 'rang');
+      const d = FILMS[f], r = bouton(el('a', 'rang'), d.g);
       const titre = el('span', 'titre');
       titre.appendChild(el('span', 'g', d.g));
       if (d.lien) titre.appendChild(el('span', 'x', d.lien));
       titre.appendChild(el('span', 'i', d.i));
-      r.append(el('span', 'no mono', pad(n + 1)), titre, el('span', 'role mono', d.role),
-        el('span', 'cat mono', CATS[d.cat] || ''), el('span', 'an mono', d.an && !String(d.i).includes(d.an) ? d.an : ''));
+      const roleEl = el('span', 'role mono', d.role);
+      roleEl.title = d.role || '';   // the cell ellipsizes, hover reads it in full
+      r.append(el('span', 'no mono', pad(n + 1)), titre, roleEl,
+        el('span', 'cat mono', catNom(d.cat)), el('span', 'an mono', d.an && !String(d.i).includes(d.an) ? d.an : ''));
       r.addEventListener('pointerenter', function (e) {
         if (tactile) return;
         flot.f = f;
@@ -1068,35 +1099,6 @@ void main(){
     flottant.style.transform = `translate3d(${x.toFixed(1)}px,${y.toFixed(1)}px,0) skewX(${(-flot.r).toFixed(2)}deg)`;
   }
 
-  // ---------------------------------------------------------------- about: stills are laid down along the path of the hand
-  const trainee = $('#trainee');
-  const pose = { x: -999, y: -999, n: 0 };
-  function poser(x, y, dx) {
-    const f = pose.n++ % FILMS.length, im = new Image();
-    im.src = affiche(f);
-    im.alt = '';
-    im.className = 'pose' + (FILMS[f].nb ? ' nb' : '');
-    im.style.left = x + 'px';
-    im.style.top = y + 'px';
-    // each still leans the way the hand was going
-    im.style.setProperty('--r', clamp(dx * .12, -14, 14).toFixed(2) + 'deg');
-    im.addEventListener('animationend', () => im.remove());
-    trainee.appendChild(im);
-    if (trainee.children.length > 6) trainee.firstChild.remove();
-  }
-  addEventListener('pointermove', function (e) {
-    if (vue() !== 'apropos' || ouvert) return;
-    const dx = e.clientX - pose.x, dy = e.clientY - pose.y;
-    if (Math.hypot(dx, dy) < (vertical ? 90 : 150)) return;
-    poser(e.clientX, e.clientY, Math.abs(dx) > 400 ? 0 : dx);
-    pose.x = e.clientX; pose.y = e.clientY;
-  });
-  addEventListener('pointerdown', function (e) {
-    if (vue() !== 'apropos' || ouvert || e.target.closest('.tete')) return;
-    poser(e.clientX, e.clientY, 0);
-    pose.x = e.clientX; pose.y = e.clientY;
-  });
-  $('#geste').textContent = tactile ? T('Touchez, glissez', 'Touch, drag') : T('Bougez le curseur', 'Move the cursor');
 
   // ---------------------------------------------------------------- the film, full frame
   const film = $('#film'), fv = $('#fv');
@@ -1115,8 +1117,20 @@ void main(){
     const fr = el('iframe');
     fr.src = `https://player.vimeo.com/video/${id}?autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0&dnt=1&playsinline=1`;
     fr.allow = 'autoplay; fullscreen; picture-in-picture';
+    fr.tabIndex = -1;
     cadreV.appendChild(fr);
-    if (!window.Vimeo) { fr.onload = () => cadreV.classList.add('on'); return; }
+    if (window.Vimeo) return attacher(fr);
+    // player.js is late or blocked: the film still plays muted; the controls come as soon as the API arrives, or are hidden after 5 s
+    fr.onload = () => cadreV.classList.add('on');
+    film.classList.add('sansapi');
+    const tard = function () { if (fr.isConnected && !joueur && window.Vimeo) attacher(fr); };
+    addEventListener('vimeo-ready', tard, { once: true });
+    setTimeout(tard, 5000);
+  }
+  const pv = document.querySelector('script[src*="player.vimeo.com/api"]');
+  if (pv) pv.addEventListener('load', () => dispatchEvent(new Event('vimeo-ready')));
+  function attacher(fr) {
+    film.classList.remove('sansapi');
     joueur = new window.Vimeo.Player(fr);
     joueur.on('timeupdate', function (e) {
       vt = e.seconds; vd = e.duration;
@@ -1172,14 +1186,16 @@ void main(){
     };
     im.src = nette(f);
   }
+  function etiquetteFilmSon() { $('#sonTxt').textContent = vmuet ? T('Son coupé', 'Muted', '음소거') : T('Son', 'Sound', '소리'); }
   function demonter() {
     cadreV.classList.remove('on');
+    if (joueur) tuer(joueur, cadreV.firstChild);
     cadreV.innerHTML = '';
     joueur = null;
     vt = vd = 0; vpause = false; vmuet = true;
     qualites = []; qualite = 'auto';
     $('#qualite').classList.remove('dispo');
-    $('#sonTxt').textContent = T('Son coupé', 'Muted');
+    etiquetteFilmSon();
     $('#son').classList.remove('actif');
   }
 
@@ -1187,7 +1203,9 @@ void main(){
     courant = f;
     recadrer();
     const d = FILMS[f], n = visibles.indexOf(f);
+    fv.poster = affiche(f);
     fv.src = boucle(f);
+    film.classList.add('attente');
     fv.loop = true;
     fv.play().catch(function () {});
     $('#fNo').textContent = `${pad(n + 1)} — ${pad(visibles.length)}`;
@@ -1218,7 +1236,7 @@ void main(){
     };
     const titre = el('div', 'gd');
     titre.append(el('h2', '', d.g), el('h3', '', (d.lien ? d.lien + ' ' : '') + d.i));
-    ligne([`${T('N°', 'No.')} ${pad(n + 1)} / ${pad(visibles.length)}`, etiquette(d)].filter(Boolean).join(' · '), titre, 'gtitre');
+    ligne([`${T('N°', 'No.', '번호')} ${pad(n + 1)} / ${pad(visibles.length)}`, etiquette(d)].filter(Boolean).join(' · '), titre, 'gtitre');
     if (d.texte.length) {
       const t = el('div', 'gd gtexte');
       for (const p of d.texte) t.appendChild(el('p', '', p));
@@ -1230,7 +1248,7 @@ void main(){
       ligne(role, dd);
     }
     if (d.vimeo) {
-      const v = carres('보기', T('Voir sur Vimeo ↗', 'Watch on Vimeo ↗'), 'a'), dd = el('div', 'gd');
+      const v = carres('보기', T('Voir sur Vimeo ↗', 'Watch on Vimeo ↗', 'Vimeo에서 보기 ↗'), 'a'), dd = el('div', 'gd');
       v.href = `https://vimeo.com/${d.vimeo}`;
       v.target = '_blank';
       v.rel = 'noopener';
@@ -1262,14 +1280,25 @@ void main(){
     choisie = e || null;
     if (choisie) choisie.style.visibility = 'hidden';
   }
+  // the rest of the site is inert while the film is open, so Tab and screen readers stay inside it
+  const fond = on => $$('.tete, #bande, #liste, #contact').forEach(e => { e.inert = on; });
+  let fermant = false, finFermer = null, tOuvrir = [], opener = null;
   function ouvrir(f, rect, depuis) {
+    if (fermant && finFermer) finFermer();
     if (ouvert) return;
+    if (!sansHistoire) empiler({ v: vue(), film: FILMS[f].slug }, '#film/' + FILMS[f].slug);
     ouvert = true;
     origine = rect;
     clearTimeout(reveil);
     quitter(survol);
     cacher(depuis);
     document.body.classList.add('film', 'sorti');
+    opener = document.activeElement;
+    film.setAttribute('role', 'dialog');
+    film.setAttribute('aria-modal', 'true');
+    film.setAttribute('aria-label', FILMS[f].g);
+    fond(true);
+    $('#retour').focus({ preventScroll: true });
     charger(f, true);
     const a = fv.animate([
       Object.assign(boite(rect), { easing: 'cubic-bezier(.2,.8,.2,1)' }),
@@ -1277,20 +1306,26 @@ void main(){
       ecran(),
     ], { duration: 1300, fill: 'both' });
     a.onfinish = function () { a.cancel(); };
-    setTimeout(function () { if (ouvert) film.classList.add('sombre'); }, 330);
+    tOuvrir = [setTimeout(function () { if (ouvert && !fermant) film.classList.add('sombre'); }, 330),
     setTimeout(function () {
-      if (!ouvert) return;
+      if (!ouvert || fermant) return;
       film.classList.add('pret');
       eveil();
       if (courant === f) { monter(FILMS[f].vimeo); nettete(f); }
-    }, 1050);
+    }, 1050)];
   }
   function fermer() {
-    if (!ouvert) return;
+    if (!ouvert || fermant) return;
+    // the film was pushed on the history: closing it steps back, popstate comes here again to do the closing
+    if (!parHistoire && history.state && history.state.film) { history.back(); return; }
+    fermant = true;
+    tOuvrir.forEach(clearTimeout);
+    fond(false);
+    film.removeAttribute('role'); film.removeAttribute('aria-modal'); film.removeAttribute('aria-label');
     info(false);
     atterrir();
     fa.classList.remove('on');
-    film.classList.remove('pret', 'repos', 'sombre');
+    film.classList.remove('pret', 'repos', 'sombre', 'attente', 'sansapi');
     clearTimeout(repos);
     demonter();
     // go back to where that film is now, if it is on screen
@@ -1311,15 +1346,21 @@ void main(){
       boite(rect),
     ], { duration: 1150, fill: 'both' });
     setTimeout(() => document.body.classList.remove('sorti'), 520);
-    a.onfinish = function () {
+    finFermer = function () {
+      finFermer = null;
       a.cancel();
       fv.pause();
       cacher(null);
-      document.body.classList.remove('film');
+      document.body.classList.remove('film', 'sorti');
+      fermant = false;
       ouvert = false;
+      demonter();
       dernierGeste = performance.now();
       luF = -1;
+      if (opener && opener.isConnected && opener.focus) opener.focus({ preventScroll: true });
+      opener = null;
     };
+    a.onfinish = function () { if (finFermer) finFermer(); };
   }
   // Between two films, a swipe: the film you were watching slides out to one side as the next one slides in from
   // the other (from the right for the next film, from the left for the previous one), both as their sharp stills.
@@ -1328,6 +1369,7 @@ void main(){
   dessous.alt = arrive.alt = '';
   let enVol = false, vol = [];
   function atterrir() {
+    fa.style.transition = '';
     vol.forEach(a => a.cancel());
     vol = [];
     dessous.classList.remove('on');
@@ -1335,7 +1377,7 @@ void main(){
     enVol = false;
   }
   function voisin(sens) {
-    if (enVol) return;
+    if (enVol || fermant) return;
     const n = Math.max(0, visibles.indexOf(courant)), suivant = visibles[(n + sens + visibles.length) % visibles.length];
     if (leger) return charger(suivant);
     enVol = true;
@@ -1378,17 +1420,18 @@ void main(){
     // unmuting inside the Vimeo frame: volume first, then the mute flag, then make sure the film is still playing
     if (!vmuet) joueur.setVolume(1).catch(function () {});
     joueur.setMuted(vmuet).catch(function () {}).then(function () { if (!vmuet && !vpause && ouvert) joueur.play().catch(function () {}); });
-    $('#sonTxt').textContent = vmuet ? T('Son coupé', 'Muted') : T('Son', 'Sound');
+    etiquetteFilmSon();
     $('#son').classList.toggle('actif', !vmuet);
   }
   function aller(t) {
     if (joueur && vd) joueur.setCurrentTime(clamp(t, 0, vd - .2)).catch(function () {});
   }
+  fv.addEventListener('playing', function () { film.classList.remove('attente'); if (ouvert) eveil(); });
   function eveil() {
     film.classList.remove('repos');
     clearTimeout(repos);
     repos = setTimeout(function () {
-      if (ouvert && !vpause && !prise && !film.classList.contains('info')) film.classList.add('repos');
+      if (ouvert && !fermant && !vpause && !prise && fv.readyState >= 3 && !film.classList.contains('info')) film.classList.add('repos');
     }, 1800);
   }
   // ---- the bar: two rows of manuscript tiles. The title is written in the top row, two letters to a tile;
@@ -1509,19 +1552,23 @@ void main(){
     if (texte !== tTexte) $('#fTc').textContent = tTexte = texte;
     if (vpause !== tPause) {
       tPause = vpause;
-      $('#pauseTxt').textContent = vpause ? T('Lecture', 'Play') : 'Pause';
+      $('#pauseTxt').textContent = vpause ? T('Lecture', 'Play', '재생') : T('Pause', 'Pause', '일시정지');
       $('#pause').classList.toggle('actif', vpause);
       $$('#pause .k b').forEach((b, k) => { b.textContent = (vpause ? '재생' : '멈춤')[k]; });
     }
   }
 
-  new MutationObserver(function () { if (!document.body.classList.contains('intro-on')) setTimeout(function () { preparer(sousF); }, 200); }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
   document.addEventListener('click', function (e) { const b = e.target.closest('button, a.btn'); if (b && b.blur && e.detail) b.blur(); }, true);
-  addEventListener('keyup', function (e) { if (e.key === ' ' && (ouvert || vue() === 'bande') && document.activeElement && document.activeElement.closest('button')) e.preventDefault(); });
+
   addEventListener('keydown', function (e) {
-    if (e.key === ' ' && document.activeElement && document.activeElement.blur && document.activeElement.closest('button')) document.activeElement.blur();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const t = e.target;
+    if (!ouvert && (e.key === 'Enter' || e.key === ' ') && t.getAttribute && t.getAttribute('role') === 'button') { e.preventDefault(); t.click(); return; }
+    // a focused control keeps its native keys (Space/Enter/arrows); only Escape is ours
+    if (e.key !== 'Escape' && t.closest && t.closest('button, input, select, textarea')) return;
     if (ouvert) {
-      if (e.key === 'Escape') film.classList.contains('info') ? info(false) : fermer();
+      if (fermant) return;
+      if (e.key === 'Escape') fermer();
       else if (e.key === ' ') { e.preventDefault(); basculer(); }
       else if (e.key === 'ArrowRight') e.shiftKey ? voisin(1) : aller(vt + 5);
       else if (e.key === 'ArrowLeft') e.shiftKey ? voisin(-1) : aller(vt - 5);
@@ -1536,27 +1583,10 @@ void main(){
     else if (!vertical && vue() === 'bande' && (e.key === '+' || e.key === '=')) viserZoom(zc * 1.4);
     else if (!vertical && vue() === 'bande' && (e.key === '-' || e.key === '_')) viserZoom(zc / 1.4);
     else if (!vertical && vue() === 'bande' && e.key === '0') viserZoom(1);
+    else if (vue() !== 'bande') return;
     else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') vertical ? pousser(PAS) : sauter(1);
     else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') vertical ? pousser(-PAS) : sauter(-1);
   });
-
-  // ---------------------------------------------------------------- about: the greeting turns through his four languages
-  const tour = $('#tour');
-  let salut = 0;
-  setInterval(function () {
-    if (vue() !== 'apropos') return;
-    salut++;
-    tour.style.transform = `translateY(${-salut * tour.firstElementChild.offsetHeight}px)`;
-    if (salut < tour.children.length - 1) return;
-    // the last line is the first one again: jump back unseen
-    setTimeout(function () {
-      tour.style.transition = 'none';
-      salut = 0;
-      tour.style.transform = '';
-      void tour.offsetWidth;
-      tour.style.transition = '';
-    }, 1000);
-  }, 2400);
 
   // contact: a cue to scroll while there is more text below; once the page has been scrolled it is gone
   const pageContact = $('#contact'), indiceContact = $('#indiceContact');
@@ -1570,14 +1600,12 @@ void main(){
   new MutationObserver(function () { contactDefile = false; pageContact.scrollTop = 0; setTimeout(indiquerContact, 700); }).observe(document.body, { attributes: true, attributeFilter: ['data-vue'] });
 
   // ---------------------------------------------------------------- contact: a click on the address copies it
-  $('#courriel').onclick = function () {
+  $('#courriel').onclick = function (e) {
     const f = $('.f', this), adresse = this.dataset.copie;
-    const ecrire = function () { location.href = 'mailto:' + adresse; };
-    if (!navigator.clipboard) return ecrire();
-    navigator.clipboard.writeText(adresse).then(function () {
-      f.textContent = T('Copié', 'Copied');
-      setTimeout(function () { f.textContent = T('Copier', 'Copy'); }, 1600);
-    }, ecrire);
+    if (!navigator.clipboard) return; // the real href opens the mail app
+    e.preventDefault();
+    const dire = function (t) { f.textContent = t; setTimeout(function () { f.textContent = T('Copier', 'Copy', '복사'); }, 1600); };
+    navigator.clipboard.writeText(adresse).then(function () { dire(T('Copié', 'Copied', '복사됨')); }, function () { dire(T('Échec', 'Copy failed', '실패')); location.href = 'mailto:' + adresse; });
   };
 
   // ---------------------------------------------------------------- the cursor: a red square that frames a command when it is over one
@@ -1616,13 +1644,13 @@ void main(){
   const fS = fmt('Asia/Seoul'), fP = fmt('Europe/Paris');
   function horloge() {
     const d = new Date();
-    $('#heures').textContent = $('#heures2').textContent = `Paris ${fP.format(d)} · ${T('Séoul', 'Seoul')} ${fS.format(d)}`;
+    $('#heures').textContent = $('#heures2').textContent = `Paris ${fP.format(d)} · ${T('Séoul', 'Seoul', '서울')} ${fS.format(d)}`;
   }
 
   // ---------------------------------------------------------------- start
   let largeurVue = 0;
   function taille() {
-    vertical = innerWidth < 700; // the edit timeline on a wide screen as before, the vertical strip on a phone
+    vertical = innerWidth < 700 || innerHeight < 470; // the edit timeline on a wide screen as before, the vertical strip on a phone (also in landscape: the timeline needs ~470px of height)
     document.body.classList.toggle('temps', !vertical);
     tailleRegle();
     // a shorter window leaves less room for tall tracks
@@ -1638,7 +1666,12 @@ void main(){
     }
     if (ouvert) { construireTuiles(); recadrer(); }
   }
-  document.addEventListener('visibilitychange', function () { if (document.hidden) vif.pause(); });
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) { if (sonOn && vw && !document.body.classList.contains('intro-on')) vw.play().catch(function () {}); return; }
+    vif.pause();
+    if (vw) vw.pause().catch(function () {});
+    if (joueur) joueur.pause().catch(function () {});
+  });
   let avant = 0;
   function image(ms) {
     const brut = (ms - avant) / 1000, dt = clamp(brut, .001, .05);
@@ -1656,6 +1689,51 @@ void main(){
     curser(dt);
     requestAnimationFrame(image);
   }
+  addEventListener('popstate', function (e) {
+    const et = e.state || (['liste', 'contact'].includes(location.hash.slice(1)) ? { v: location.hash.slice(1) } : {});
+    if (enPassage || document.body.classList.contains('intro-on')) return;
+    sansHistoire = parHistoire = true;
+    if (et.film) {
+      const f = FILMS.findIndex(d => d.slug === et.film);
+      if (f >= 0 && !ouvert) { voir(et.v || 'bande'); ouvrir(f, new DOMRect(innerWidth / 2 - 80, innerHeight / 2 - 45, 160, 90)); }
+    } else {
+      if (ouvert) fermer();
+      voir(et.v || 'bande');
+    }
+    sansHistoire = parHistoire = false;
+  });
+  // a link such as #contact or #film/slug is followed once the intro is out of the way
+  function suivreLien() {
+    const h = hashDepart.slice(1), m = h.match(/^film\/(.+)$/);
+    sansHistoire = true;
+    if (m) {
+      const f = FILMS.findIndex(d => d.slug === m[1]);
+      if (f >= 0) { sansHistoire = false; ouvrir(f, new DOMRect(innerWidth / 2 - 80, innerHeight / 2 - 45, 160, 90)); }
+    } else if (['liste', 'contact'].includes(h)) { voir(h); }
+    sansHistoire = false;
+  }
+  if (document.body.classList.contains('intro-on')) {
+    const attente = new MutationObserver(function () {
+      if (document.body.classList.contains('intro-on')) return;
+      attente.disconnect();
+      suivreLien();
+    });
+    attente.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  } else setTimeout(suivreLien, 300);
+  // a language switch redoes every text the script built: filters, track names, list, labels, hints, credits, clock
+  function relangue() {
+    if (!ready) return;
+    construireFiltres();
+    $$('.nompiste').forEach(b => { b.textContent = `V${+b.dataset.k + 1} ${catNom(b.dataset.c) || T('Autre', 'Other', '기타')}`; });
+    construireListe();
+    etiquetteSon();
+    etiquetteFilmSon();
+    tPause = !vpause;   // the timeline refresh rewrites the pause label
+    ecrireAide();
+    horloge();
+    if (ouvert) fiche(courant, visibles.indexOf(courant));
+  }
+  let ready = false;
   poserLangue(langue);
   for (const b of document.querySelectorAll('#langues button')) b.addEventListener('click', () => poserLangue(b.dataset.l));
   construireFiltres();
@@ -1663,6 +1741,8 @@ void main(){
   voir('bande');
   taille();
   horloge();
+  ready = true;
+  etiquetteFilmSon();
   setInterval(horloge, 1000);
   addEventListener('resize', taille);
   if (document.fonts) document.fonts.ready.then(ajusterTitres);
