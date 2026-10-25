@@ -1682,7 +1682,7 @@ void main(){
     // a shorter window leaves less room for tall tracks
     if (!vertical) regleHauteur(hp);
     // in-app browsers (WhatsApp, Instagram) open in a short window that grows after: a big change of height rebuilds the strip too, the toolbar's small one does not
-    if (innerWidth !== largeurVue || Math.abs(innerHeight - hauteurVue) > 120) {
+    if (innerWidth !== largeurVue || (vertical && Math.abs(innerHeight - hauteurVue) > 120)) {
       largeurVue = innerWidth; hauteurVue = innerHeight;
       construireBande();
       construireTitres();
