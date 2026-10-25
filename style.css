@@ -3100,3 +3100,7 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
 @media (max-width: 699px) { body[data-vue="contact"] .qui .salue { left: 0; top: 41px; } }
 /* phone: the clock takes the blank space between the name and the buttons, on two lines */
 @media (max-width: 699px) { .heures { right: calc(138px + env(safe-area-inset-right)); top: 22px; width: 100px; text-align: right; white-space: normal; font-size: 10px; line-height: 1.5; color: var(--gris); } }
+/* 25 Oct: phone, the clock no longer squeezes between the name and the buttons: one line, right edge, on the greeting's row */
+@media (max-width: 699px) { .heures { left: auto; right: calc(16px + env(safe-area-inset-right)); top: 57px; width: auto; text-align: right; white-space: nowrap; font-size: 9px; line-height: 1; letter-spacing: 0; } }
+/* phone player: the sound square takes the height of the lettered tiles, so all four captions sit on one line */
+@media (max-width: 699px) { #film .ico { width: 26px; height: 26px; } }

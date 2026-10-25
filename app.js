@@ -1670,7 +1670,7 @@ void main(){
   const fS = fmt('Asia/Seoul'), fP = fmt('Europe/Paris');
   function horloge() {
     const d = new Date();
-    $('#heures').textContent = $('#heures2').textContent = `Paris ${fP.format(d)} · ${T('Séoul', 'Seoul', '서울')} ${fS.format(d)}`;
+    $('#heures').textContent = $('#heures2').textContent = `Paris ${fP.format(d)}\u2003${T('Séoul', 'Seoul', '서울')} ${fS.format(d)}`;
   }
 
   // ---------------------------------------------------------------- start
