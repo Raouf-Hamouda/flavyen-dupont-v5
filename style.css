@@ -3116,3 +3116,5 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
 @media (hover: none) { #flottant { display: none !important; } }
 /* 25 Oct: between 1001 and 1100 px the filters (left: 36%) ran into the Films/Contact squares: they keep the narrow-desktop spot */
 @media (min-width: 1001px) and (max-width: 1100px) { .filtres { left: 190px; } }
+/* 25 Oct: phone, the filters a touch bolder (Plex Mono 500, same width so they still fit) */
+@media (max-width: 830px) { #cats button { font-weight: 500; } }
