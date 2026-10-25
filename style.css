@@ -3104,3 +3104,5 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
 @media (max-width: 699px) { .heures { left: auto; right: calc(16px + env(safe-area-inset-right)); top: 57px; width: auto; text-align: right; white-space: nowrap; font-size: 9px; line-height: 1; letter-spacing: 0; } }
 /* phone player: the sound square takes the height of the lettered tiles, so all four captions sit on one line */
 @media (max-width: 699px) { #film .ico { width: 26px; height: 26px; } }
+/* 25 Oct: phone, the filters take the clock's typeface (mono, capitals) */
+@media (max-width: 830px) { #cats button { font: 400 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; } }

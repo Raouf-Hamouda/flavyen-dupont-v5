@@ -1674,15 +1674,16 @@ void main(){
   }
 
   // ---------------------------------------------------------------- start
-  let largeurVue = 0;
+  let largeurVue = 0, hauteurVue = 0;
   function taille() {
     vertical = innerWidth < 700 || innerHeight < 470; // the edit timeline on a wide screen as before, the vertical strip on a phone (also in landscape: the timeline needs ~470px of height)
     document.body.classList.toggle('temps', !vertical);
     tailleRegle();
     // a shorter window leaves less room for tall tracks
     if (!vertical) regleHauteur(hp);
-    if (innerWidth !== largeurVue) {
-      largeurVue = innerWidth;
+    // in-app browsers (WhatsApp, Instagram) open in a short window that grows after: a big change of height rebuilds the strip too, the toolbar's small one does not
+    if (innerWidth !== largeurVue || Math.abs(innerHeight - hauteurVue) > 120) {
+      largeurVue = innerWidth; hauteurVue = innerHeight;
       construireBande();
       construireTitres();
       ajusterTitres();
