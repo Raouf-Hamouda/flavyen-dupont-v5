@@ -1686,8 +1686,8 @@ void main(){
     // a shorter window leaves less room for tall tracks
     if (!vertical) regleHauteur(hp);
     // in-app browsers (WhatsApp, Instagram) open in a short window that grows after: a big change of height rebuilds the strip too, the toolbar's small one does not
-    if (innerWidth !== largeurVue || (vertical && Math.abs(innerHeight - hauteurVue) > 120)) {
-      largeurVue = innerWidth; hauteurVue = innerHeight;
+    if (innerWidth !== largeurVue || (vertical && Math.abs(bandeEl.clientHeight - hauteurVue) > 120)) {
+      largeurVue = innerWidth; hauteurVue = bandeEl.clientHeight;
       construireBande();
       construireTitres();
       ajusterTitres();
@@ -1776,6 +1776,8 @@ void main(){
   etiquetteFilmSon();
   setInterval(horloge, 1000);
   addEventListener('resize', taille);
+  // the strip's own box can reach its height after the first build (slow load, in-app browsers): it rebuilds when it does
+  if ('ResizeObserver' in window) new ResizeObserver(function () { if (vertical && Math.abs(bandeEl.clientHeight - hauteurVue) > 120) taille(); }).observe(bandeEl);
   if (document.fonts) document.fonts.ready.then(ajusterTitres);
   requestAnimationFrame(function (ms) { avant = ms; image(ms); });
 })();
