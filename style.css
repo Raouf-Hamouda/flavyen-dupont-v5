@@ -3124,3 +3124,10 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
   #regle { top: 120px; height: calc(100% - 244px); }
   #liste { top: 126px; }
 }
+/* 25 Oct: Contact on phone. The foot bar has a clean edge (no fade turning the last lines into ghosts);
+   the language words sit closer, underline right under the word (the 44px touch box stays through ::after);
+   Copy drops 5px lower under the address */
+@media (max-width: 899px) { body[data-vue="contact"] .credit::before { display: none; } body[data-vue="contact"] .credit { border-top: 1px solid #ebebeb; } }
+@media (pointer: coarse) { #langues button { min-width: 0; min-height: 0; padding: 4px 0; } }
+.langues { gap: 24px; }
+@media (max-width: 380px) { #contact #courriel .f { margin-top: 5px; } }

@@ -1632,7 +1632,9 @@ void main(){
   }
   pageContact.addEventListener('scroll', function () { if (pageContact.scrollTop > 8) contactDefile = true; document.body.style.setProperty('--dy', pageContact.scrollTop + 'px'); indiquerContact(); }, { passive: true });
   addEventListener('resize', indiquerContact);
-  new MutationObserver(function () { contactDefile = false; pageContact.scrollTop = 0; setTimeout(indiquerContact, 700); }).observe(document.body, { attributes: true, attributeFilter: ['data-vue'] });
+  // the scroll hint shows for a moment when Contact opens, then goes by itself
+  let finIndice;
+  new MutationObserver(function () { contactDefile = false; pageContact.scrollTop = 0; setTimeout(indiquerContact, 700); clearTimeout(finIndice); finIndice = setTimeout(function () { contactDefile = true; indiquerContact(); }, 3200); }).observe(document.body, { attributes: true, attributeFilter: ['data-vue'] });
 
   // ---------------------------------------------------------------- contact: a click on the address copies it
   $('#courriel').onclick = function (e) {
