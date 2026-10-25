@@ -3103,6 +3103,16 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
 /* 25 Oct: phone, the clock no longer squeezes between the name and the buttons: one line, right edge, on the greeting's row */
 @media (max-width: 699px) { .heures { left: auto; right: calc(16px + env(safe-area-inset-right)); top: 57px; width: auto; text-align: right; white-space: nowrap; font-size: 9px; line-height: 1; letter-spacing: 0; } }
 /* phone player: the sound square takes the height of the lettered tiles, so all four captions sit on one line */
-@media (max-width: 699px) { #film .ico { width: 26px; height: 26px; } }
+#film .ico { width: 26px; height: 26px; }
 /* 25 Oct: phone, the filters take the clock's typeface (mono, capitals) */
 @media (max-width: 830px) { #cats button { font: 400 10.5px/1.2 var(--mono); letter-spacing: .06em; text-transform: uppercase; } }
+/* 25 Oct: phone, the four filters always fit on one line before the view switch: the size follows the width, no faded edge */
+@media (max-width: 699px) {
+  .filtres { -webkit-mask-image: none; mask-image: none; }
+  #cats { gap: 2vw; }
+  #cats button { font-size: clamp(6.5px, calc(3.4vw - 4.2px), 10.5px); }
+}
+/* touch screens: no floating still when a name in the list is pressed, the film opens straight away */
+@media (hover: none) { #flottant { display: none !important; } }
+/* 25 Oct: between 1001 and 1100 px the filters (left: 36%) ran into the Films/Contact squares: they keep the narrow-desktop spot */
+@media (min-width: 1001px) and (max-width: 1100px) { .filtres { left: 190px; } }

@@ -1382,6 +1382,8 @@ void main(){
   function voisin(sens) {
     if (enVol || fermant) return;
     const n = Math.max(0, visibles.indexOf(courant)), suivant = visibles[(n + sens + visibles.length) % visibles.length];
+    // the address follows the film on screen, so a shared link opens this one
+    try { history.replaceState(Object.assign({}, history.state, { film: FILMS[suivant].slug }), '', '#film/' + FILMS[suivant].slug); } catch (e) {}
     if (leger) return charger(suivant);
     enVol = true;
     dessous.src = nette(courant);
@@ -1512,7 +1514,9 @@ void main(){
   tTemps.addEventListener('pointerup', function () { prise = false; });
   tTemps.addEventListener('pointerleave', function () { if (!prise) tCases.forEach(c => c.classList.remove('hov')); });
   $('#pause').onclick = basculer;
-  $('#voile').addEventListener('click', basculer);
+  // on a touch screen, the tap that brings the hidden buttons back only shows them; it does not pause the film
+  let tapReveil = false;
+  $('#voile').addEventListener('click', function () { if (tapReveil) { tapReveil = false; return; } basculer(); });
   $('#retour').onclick = fermer;
   $('#son').onclick = son;
   $('#qualite').onclick = qualiteSuivante;
@@ -1550,7 +1554,7 @@ void main(){
   $('#prec').onclick = () => voisin(-1);
   $('#suiv').onclick = () => voisin(1);
   film.addEventListener('pointermove', eveil);
-  film.addEventListener('pointerdown', eveil);
+  film.addEventListener('pointerdown', function (e) { tapReveil = e.pointerType !== 'mouse' && film.classList.contains('repos'); eveil(); });
 
   function lecteur(dt) {
     if (!ouvert) return;
