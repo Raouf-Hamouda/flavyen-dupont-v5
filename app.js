@@ -1071,17 +1071,19 @@ void main(){
       roleEl.title = d.role || '';   // the cell ellipsizes, hover reads it in full
       r.append(el('span', 'no mono', pad(n + 1)), titre, roleEl,
         el('span', 'cat mono', catNom(d.cat)), el('span', 'an mono', d.an && !String(d.i).includes(d.an) ? d.an : ''));
-      r.addEventListener('pointerenter', function (e) {
-        if (tactile) return;
+      function montrer(e) {
         flot.f = f;
         $('img', flottant).src = affiche(f);
         // the hovered film plays in the little window, from its own loop
         vignetteV.classList.remove('vivant'); vignetteV.src = boucle(f); vignetteV.play().catch(function () {});
         flot.x = flot.tx = e.clientX; flot.y = flot.ty = e.clientY;
         flottant.classList.add('on');
-      });
-      r.addEventListener('pointerleave', () => { flottant.classList.remove('on'); vignetteV.pause(); vignetteV.classList.remove('vivant'); });
+      }
+      r.addEventListener('pointerenter', function (e) { if (!tactile) montrer(e); });
+      r.addEventListener('pointerleave', () => { if (tactile) return; flottant.classList.remove('on'); vignetteV.pause(); vignetteV.classList.remove('vivant'); });
       r.addEventListener('click', function (e) {
+        // on a touch screen the first tap on a name shows its little preview, a second tap on it opens the film
+        if (tactile && !(flottant.classList.contains('on') && flot.f === f)) { montrer(e); return; }
         const rect = flottant.classList.contains('on') ? flottant.getBoundingClientRect()
           : { left: e.clientX - 60, top: e.clientY - 40, width: 120, height: 80 };
         ouvrir(f, rect);
@@ -1090,6 +1092,9 @@ void main(){
     });
   }
   addEventListener('pointermove', function (e) { flot.tx = e.clientX; flot.ty = e.clientY; });
+  // touch: a tap anywhere but on a name, or scrolling the list, puts the preview away
+  addEventListener('pointerdown', function (e) { if (tactile && flottant.classList.contains('on') && !e.target.closest('.rang')) { flottant.classList.remove('on'); vignetteV.pause(); } });
+  liste.addEventListener('scroll', function () { if (tactile && flottant.classList.contains('on')) { flottant.classList.remove('on'); vignetteV.pause(); } }, { passive: true });
   function flotter(dt) {
     if (!flottant.classList.contains('on')) return;
     const ax = flot.x, fw = flottant.offsetWidth, fh = flottant.offsetHeight;

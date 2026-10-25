@@ -3112,9 +3112,15 @@ body.net .outils, body.net #poignee, body.net #sonAccueil, body.net .filtres, bo
   #cats { gap: 2vw; }
   #cats button { font-size: clamp(6.5px, calc(3.4vw - 4.2px), 10.5px); }
 }
-/* touch screens: no floating still when a name in the list is pressed, the film opens straight away */
-@media (hover: none) { #flottant { display: none !important; } }
 /* 25 Oct: between 1001 and 1100 px the filters (left: 36%) ran into the Films/Contact squares: they keep the narrow-desktop spot */
 @media (min-width: 1001px) and (max-width: 1100px) { .filtres { left: 190px; } }
 /* 25 Oct: phone, the filters a touch bolder (Plex Mono 500, same width so they still fit) */
-@media (max-width: 830px) { #cats button { font-weight: 500; } }
+@media (max-width: 830px) { #cats button { font-weight: 600; } }
+/* 25 Oct: phone, the filter row and the view switch sit a little lower, closer to the content */
+@media (max-width: 699px) { .filtres, .vues { top: 88px; } }
+@media (max-width: 699px) {
+  #bande { top: 120px; height: calc(100% - 120px - 124px); }
+  .axe { top: calc(120px + (100% - 244px) / 2); }
+  #regle { top: 120px; height: calc(100% - 244px); }
+  #liste { top: 126px; }
+}
